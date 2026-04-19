@@ -1,0 +1,2120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Harsh Sharma — Game Developer & 3D Artist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #181818;
+    --border: #222222;
+    --accent: #e8ff47;
+    --accent2: #ffffff;
+    --text: #f0f0f0;
+    --muted: #666666;
+    --muted2: #999999;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* Custom Cursor */
+  #cursor {
+    position: fixed;
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+    mix-blend-mode: difference;
+  }
+  #cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(232,255,71,0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.12s ease-out, width 0.25s, height 0.25s, opacity 0.2s;
+  }
+  body:not(:hover) #cursor, body:not(:hover) #cursor-ring { opacity: 0; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); }
+
+  /* Layout */
+  .container { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 0;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  nav.scrolled {
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    border-color: var(--border);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 120px 0 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(232,255,71,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,255,71,0.04) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+  }
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(232,255,71,0.07) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 1; }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(232,255,71,0.3);
+    padding: 6px 14px; border-radius: 100px;
+    margin-bottom: 32px;
+    opacity: 0; animation: fadeUp 0.7s 0.2s forwards;
+  }
+  .hero-tag::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--accent); border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+
+  .hero-name {
+    font-family: var(--font-display);
+    font-size: clamp(56px, 9vw, 112px);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 0.92;
+    margin-bottom: 24px;
+    opacity: 0; animation: fadeUp 0.8s 0.35s forwards;
+  }
+  .hero-name .line2 { color: var(--muted); }
+  .hero-name .accent { color: var(--accent); }
+
+  .hero-desc {
+    max-width: 520px;
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--muted2);
+    line-height: 1.75;
+    margin-bottom: 48px;
+    opacity: 0; animation: fadeUp 0.8s 0.5s forwards;
+  }
+
+  .hero-ctas {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    opacity: 0; animation: fadeUp 0.8s 0.65s forwards;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: #0a0a0a;
+    font-family: var(--font-display); font-weight: 700; font-size: 14px;
+    letter-spacing: 0.04em;
+    padding: 14px 28px; border-radius: 4px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(232,255,71,0.25); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); color: var(--text);
+    font-family: var(--font-display); font-weight: 600; font-size: 14px;
+    letter-spacing: 0.04em;
+    padding: 14px 28px; border-radius: 4px;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .hero-scroll {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--muted); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    opacity: 0; animation: fadeIn 1s 1.2s forwards;
+  }
+  .scroll-line {
+    width: 1px; height: 48px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+    animation: scrollLine 2s 1.5s infinite;
+  }
+  @keyframes scrollLine { 0%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} 51%{transform:scaleY(1);transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
+
+  .hero-stats {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 24px;
+    opacity: 0; animation: fadeLeft 0.8s 0.8s forwards;
+  }
+  .stat-item { text-align: right; }
+  .stat-num {
+    font-family: var(--font-display); font-size: 36px; font-weight: 800;
+    color: var(--accent); line-height: 1;
+  }
+  .stat-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+  /* SECTION */
+  section { padding: 100px 0; }
+  .section-header { margin-bottom: 64px; }
+  .section-eyebrow {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: var(--font-display); font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800; letter-spacing: -0.03em; line-height: 1.05;
+  }
+  .section-title .dim { color: var(--muted); }
+  .section-line {
+    width: 48px; height: 2px; background: var(--accent);
+    margin-top: 20px;
+  }
+
+  /* ABOUT */
+  #about { border-top: 1px solid var(--border); }
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;
+  }
+  .about-text p {
+    font-size: 17px; font-weight: 300; color: var(--muted2); line-height: 1.8;
+    margin-bottom: 20px;
+  }
+  .about-text p strong { color: var(--text); font-weight: 500; }
+  .about-tools { display: flex; flex-direction: column; gap: 20px; }
+  .tool-row { display: flex; flex-direction: column; gap: 8px; }
+  .tool-label {
+    display: flex; justify-content: space-between;
+    font-size: 12px; letter-spacing: 0.06em;
+    color: var(--muted2);
+  }
+  .tool-label span:last-child { color: var(--accent); font-weight: 500; }
+  .tool-bar {
+    height: 2px; background: var(--border); border-radius: 2px; overflow: hidden;
+  }
+  .tool-fill {
+    height: 100%; background: var(--accent);
+    width: 0; border-radius: 2px;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* PROJECTS */
+  #projects { border-top: 1px solid var(--border); }
+  .projects-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px;
+  }
+  .project-card {
+    position: relative; overflow: hidden;
+    background: var(--surface);
+    aspect-ratio: 4/3;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 32px;
+    border: 1px solid var(--border);
+    transition: border-color 0.3s;
+    text-decoration: none;
+  }
+  .project-card:hover { border-color: var(--accent); }
+  .project-card.featured { grid-column: span 2; aspect-ratio: 16/7; }
+
+  .project-bg {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .project-pattern {
+    width: 100%; height: 100%;
+    opacity: 0.15;
+    transition: opacity 0.4s, transform 0.6s;
+  }
+  .project-card:hover .project-pattern { opacity: 0.25; transform: scale(1.03); }
+
+  .project-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.2) 60%, transparent 100%);
+    transition: opacity 0.3s;
+  }
+  .project-content { position: relative; z-index: 1; }
+  .project-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tag {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); border: 1px solid rgba(232,255,71,0.3);
+    padding: 4px 10px; border-radius: 100px;
+  }
+  .tag.engine { color: var(--muted2); border-color: var(--border); }
+  .project-title {
+    font-family: var(--font-display); font-size: clamp(20px, 2.5vw, 28px);
+    font-weight: 700; letter-spacing: -0.02em; color: var(--text);
+    margin-bottom: 8px;
+  }
+  .project-desc {
+    font-size: 14px; font-weight: 300; color: var(--muted2); line-height: 1.6;
+    max-width: 480px;
+  }
+  .project-arrow {
+    position: absolute; top: 28px; right: 28px;
+    width: 36px; height: 36px;
+    border: 1px solid var(--border); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted2); font-size: 14px;
+    transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+    z-index: 1;
+  }
+  .project-card:hover .project-arrow {
+    background: var(--accent); border-color: var(--accent);
+    color: #0a0a0a; transform: rotate(45deg);
+  }
+
+  /* 3D Art / Design Section */
+  #design { border-top: 1px solid var(--border); }
+  .design-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+  }
+  .design-item {
+    position: relative; overflow: hidden;
+    background: var(--surface);
+    aspect-ratio: 1;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.3s;
+  }
+  .design-item:hover { border-color: var(--accent); }
+  .design-item:first-child { grid-column: span 2; aspect-ratio: 2/1; }
+  .design-inner {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+  }
+  .design-visual {
+    width: 100%; height: 100%;
+    transition: transform 0.5s ease;
+  }
+  .design-item:hover .design-visual { transform: scale(1.04); }
+  .design-label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(10,10,10,0.9), transparent);
+    transform: translateY(8px); opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .design-item:hover .design-label { opacity: 1; transform: translateY(0); }
+  .design-label-title {
+    font-family: var(--font-display); font-size: 15px; font-weight: 700;
+    color: var(--text);
+  }
+  .design-label-sub { font-size: 12px; color: var(--muted2); }
+
+  /* SKILLS */
+  #skills { border-top: 1px solid var(--border); }
+  .skills-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
+  }
+  .skill-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px 28px;
+    transition: border-color 0.3s, background 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .skill-block:hover { border-color: var(--accent); background: var(--surface2); }
+  .skill-block::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--accent);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .skill-block:hover::before { transform: scaleX(1); }
+  .skill-icon {
+    font-size: 28px; margin-bottom: 16px; display: block;
+  }
+  .skill-name {
+    font-family: var(--font-display); font-size: 16px; font-weight: 700;
+    margin-bottom: 8px; color: var(--text);
+  }
+  .skill-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* CONTACT */
+  #contact { border-top: 1px solid var(--border); }
+  .contact-inner {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;
+  }
+  .contact-left h2 {
+    font-family: var(--font-display); font-size: clamp(36px, 5vw, 60px);
+    font-weight: 800; letter-spacing: -0.04em; line-height: 1;
+    margin-bottom: 24px;
+  }
+  .contact-left h2 .accent { color: var(--accent); }
+  .contact-left p { font-size: 16px; color: var(--muted2); font-weight: 300; line-height: 1.7; max-width: 400px; }
+  .contact-links { display: flex; flex-direction: column; gap: 2px; margin-top: 0; }
+  .contact-link {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    transition: padding-left 0.2s;
+    group: true;
+  }
+  .contact-link:hover { padding-left: 8px; }
+  .contact-link-left { display: flex; align-items: center; gap: 14px; }
+  .contact-link-icon {
+    width: 40px; height: 40px;
+    border: 1px solid var(--border); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .contact-link:hover .contact-link-icon { background: var(--accent); border-color: var(--accent); }
+  .contact-link-text { font-size: 14px; font-weight: 500; color: var(--text); }
+  .contact-link-sub { font-size: 12px; color: var(--muted); }
+  .contact-link-arrow { color: var(--muted); font-size: 16px; transition: color 0.2s, transform 0.2s; }
+  .contact-link:hover .contact-link-arrow { color: var(--accent); transform: translateX(4px); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 0;
+  }
+  .footer-inner {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-copy { font-size: 13px; color: var(--muted); }
+  .footer-badge {
+    font-size: 12px; color: var(--muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .footer-badge span { color: var(--accent); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(24px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  @keyframes fadeLeft {
+    from { opacity:0; transform: translateX(24px); }
+    to   { opacity:1; transform: translateX(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity:0; }
+    to   { opacity:1; }
+  }
+
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .about-grid { grid-template-columns: 1fr; gap: 48px; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .project-card.featured { grid-column: span 1; aspect-ratio: 4/3; }
+    .design-grid { grid-template-columns: 1fr 1fr; }
+    .design-item:first-child { grid-column: span 2; }
+    .skills-grid { grid-template-columns: 1fr 1fr; }
+    .contact-inner { grid-template-columns: 1fr; gap: 48px; }
+    .hero-stats { display: none; }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 0 20px; }
+    .design-grid { grid-template-columns: 1fr; }
+    .design-item:first-child { grid-column: span 1; aspect-ratio: 4/3; }
+    .skills-grid { grid-template-columns: 1fr; }
+    .hero-ctas { flex-direction: column; }
+  }
+
+  /* SVG Art Patterns for project cards */
+  .pattern-space { background: radial-gradient(ellipse at 30% 40%, #1a1a2e 0%, #0a0a0a 60%), url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='15' cy='15' r='1' fill='%23e8ff47' opacity='0.6'/%3E%3Ccircle cx='75' cy='40' r='0.7' fill='%23ffffff' opacity='0.5'/%3E%3Ccircle cx='45' cy='70' r='1.2' fill='%23ffffff' opacity='0.4'/%3E%3Ccircle cx='90' cy='85' r='0.9' fill='%23e8ff47' opacity='0.5'/%3E%3Ccircle cx='30' cy='55' r='0.6' fill='%23ffffff' opacity='0.3'/%3E%3C/svg%3E"); }
+  .pattern-dungeon { background: linear-gradient(135deg, #1a0a00 0%, #0a0a0a 70%); }
+  .pattern-racing { background: linear-gradient(to right, #0a0a0a 0%, #001a00 100%); }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#hero" class="nav-logo">HS<span>.</span></a>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#projects">Games</a></li>
+        <li><a href="#design">3D Art</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#demos">Demos</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-tag">Available for work &amp; collaboration</div>
+      <h1 class="hero-name">
+        Harsh<br>
+        <span class="line2">Sharma<span class="accent">.</span></span>
+      </h1>
+      <p class="hero-desc">
+        Indie game developer, 3D artist, and real-time experience designer.
+        Crafting worlds in <strong>Unity</strong> &amp; <strong>Unreal Engine</strong> — from concept to shipped product.
+      </p>
+      <div class="hero-ctas">
+        <a href="#projects" class="btn-primary">View My Games ↓</a>
+        <a href="#contact" class="btn-ghost">Get in Touch</a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">3+</div>
+        <div class="stat-label">Years<br>Experience</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">10+</div>
+        <div class="stat-label">Projects<br>Shipped</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">2</div>
+        <div class="stat-label">Engines<br>Mastered</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">01 — About</div>
+      <h2 class="section-title">Builder of<br><span class="dim">interactive worlds</span></h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>I'm <strong>Harsh Sharma</strong>, an indie game developer and 3D artist passionate about building immersive experiences that blur the line between art and technology.</p>
+        <p>I work across the full pipeline — <strong>game design, 3D modeling, rigging, shaders, and real-time rendering</strong> — using Unity and Unreal Engine as my primary creative environments.</p>
+        <p>My work spans genres: from atmospheric exploration games to fast-paced action titles. I love the challenge of communicating a feeling through gameplay mechanics and visual design.</p>
+        <p>When I'm not building games, I'm creating standalone <strong>3D art, environment concepts, and character designs</strong> that push the limits of what real-time graphics can achieve.</p>
+      </div>
+      <div class="about-tools reveal">
+        <div style="font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;">Tools & Proficiency</div>
+        <div class="tool-row">
+          <div class="tool-label"><span>Unity</span><span>95%</span></div>
+          <div class="tool-bar"><div class="tool-fill" data-width="95"></div></div>
+        </div>
+        <div class="tool-row">
+          <div class="tool-label"><span>Unreal Engine 5</span><span>85%</span></div>
+          <div class="tool-bar"><div class="tool-fill" data-width="85"></div></div>
+        </div>
+        <div class="tool-row">
+          <div class="tool-label"><span>Blender</span><span>90%</span></div>
+          <div class="tool-bar"><div class="tool-fill" data-width="90"></div></div>
+        </div>
+        <div class="tool-row">
+          <div class="tool-label"><span>C# / Blueprints</span><span>80%</span></div>
+          <div class="tool-bar"><div class="tool-fill" data-width="80"></div></div>
+        </div>
+        <div class="tool-row">
+          <div class="tool-label"><span>Substance Painter</span><span>75%</span></div>
+          <div class="tool-bar"><div class="tool-fill" data-width="75"></div></div>
+        </div>
+        <div class="tool-row">
+          <div class="tool-label"><span>Figma / UI Design</span><span>70%</span></div>
+          <div class="tool-bar"><div class="tool-fill" data-width="70"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">02 — Games</div>
+      <h2 class="section-title">Shipped<br><span class="dim">projects</span></h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="projects-grid reveal">
+
+      <!-- FEATURED -->
+      <div class="project-card featured">
+        <div class="project-bg">
+          <svg class="project-pattern" viewBox="0 0 1200 420" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <radialGradient id="pg1" cx="30%" cy="50%">
+                <stop offset="0%" stop-color="#e8ff47" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#0a0a0a" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <rect width="1200" height="420" fill="url(#pg1)"/>
+            <!-- Star field -->
+            <g fill="#ffffff">
+              <circle cx="120" cy="80" r="1.2" opacity="0.6"/><circle cx="340" cy="140" r="0.8" opacity="0.4"/>
+              <circle cx="600" cy="60" r="1" opacity="0.5"/><circle cx="900" cy="100" r="0.7" opacity="0.6"/>
+              <circle cx="1100" cy="50" r="1.3" opacity="0.4"/><circle cx="200" cy="300" r="0.9" opacity="0.3"/>
+              <circle cx="450" cy="350" r="1.1" opacity="0.5"/><circle cx="750" cy="280" r="0.8" opacity="0.4"/>
+              <circle cx="1050" cy="330" r="1" opacity="0.6"/>
+            </g>
+            <!-- Planet -->
+            <circle cx="900" cy="210" r="110" fill="#1a1a2e" opacity="0.8"/>
+            <circle cx="900" cy="210" r="108" fill="none" stroke="#e8ff47" stroke-width="0.5" opacity="0.3"/>
+            <ellipse cx="900" cy="210" rx="160" ry="20" fill="none" stroke="#e8ff47" stroke-width="1" opacity="0.2"/>
+            <!-- Ship silhouette -->
+            <polygon points="300,230 380,180 390,230 380,280" fill="#e8ff47" opacity="0.4"/>
+            <polygon points="320,230 300,220 310,230 300,240" fill="#e8ff47" opacity="0.2"/>
+          </svg>
+        </div>
+        <div class="project-overlay"></div>
+        <div class="project-content">
+          <div class="project-tags">
+            <span class="tag">Action</span>
+            <span class="tag">Space</span>
+            <span class="tag engine">Unity</span>
+          </div>
+          <div class="project-title">Void Protocol</div>
+          <div class="project-desc">A fast-paced space combat game with procedural enemy AI and handcrafted ship models. Built solo over 6 months. Features original soundtrack integration and dynamic difficulty scaling.</div>
+        </div>
+        <div class="project-arrow">↗</div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="project-card">
+        <div class="project-bg">
+          <svg class="project-pattern" viewBox="0 0 600 450" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <radialGradient id="pg2" cx="50%" cy="50%">
+                <stop offset="0%" stop-color="#8b4513" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#0a0a0a" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <rect width="600" height="450" fill="url(#pg2)"/>
+            <!-- Dungeon bricks -->
+            <g fill="none" stroke="#e8ff47" stroke-width="0.5" opacity="0.15">
+              <rect x="10" y="10" width="80" height="40"/><rect x="100" y="10" width="80" height="40"/>
+              <rect x="50" y="60" width="80" height="40"/><rect x="140" y="60" width="80" height="40"/>
+              <rect x="10" y="110" width="80" height="40"/><rect x="100" y="110" width="80" height="40"/>
+            </g>
+            <!-- Torch glow -->
+            <radialGradient id="torch" cx="50%" cy="60%">
+              <stop offset="0%" stop-color="#ff8c00" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#0a0a0a" stop-opacity="0"/>
+            </radialGradient>
+            <circle cx="300" cy="225" r="160" fill="url(#torch)"/>
+            <polygon points="290,180 310,180 320,230 280,230" fill="#ff8c00" opacity="0.5"/>
+            <polygon points="295,170 305,170 308,185 292,185" fill="#ffffff" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="project-overlay"></div>
+        <div class="project-content">
+          <div class="project-tags">
+            <span class="tag">RPG</span>
+            <span class="tag">Dungeon</span>
+            <span class="tag engine">Unreal 5</span>
+          </div>
+          <div class="project-title">Ashhold Depths</div>
+          <div class="project-desc">A first-person dungeon crawler featuring hand-sculpted stone environments, atmospheric lighting, and a custom inventory system built entirely in Blueprints.</div>
+        </div>
+        <div class="project-arrow">↗</div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="project-card">
+        <div class="project-bg">
+          <svg class="project-pattern" viewBox="0 0 600 450" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <radialGradient id="pg3" cx="20%" cy="70%">
+                <stop offset="0%" stop-color="#00ff88" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#0a0a0a" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <rect width="600" height="450" fill="url(#pg3)"/>
+            <!-- Road -->
+            <rect x="250" y="0" width="100" height="450" fill="#111" opacity="0.6"/>
+            <rect x="295" y="0" width="10" height="450" fill="#e8ff47" opacity="0.15"/>
+            <!-- Car shape -->
+            <rect x="258" y="300" width="84" height="44" rx="6" fill="#e8ff47" opacity="0.3"/>
+            <rect x="268" y="290" width="64" height="20" rx="4" fill="#e8ff47" opacity="0.15"/>
+            <!-- Speed lines -->
+            <g stroke="#ffffff" stroke-width="0.5" opacity="0.1">
+              <line x1="0" y1="100" x2="240" y2="100"/><line x1="0" y1="200" x2="240" y2="200"/>
+              <line x1="360" y1="150" x2="600" y2="150"/><line x1="360" y1="280" x2="600" y2="280"/>
+            </g>
+          </svg>
+        </div>
+        <div class="project-overlay"></div>
+        <div class="project-content">
+          <div class="project-tags">
+            <span class="tag">Racing</span>
+            <span class="tag">Arcade</span>
+            <span class="tag engine">Unity</span>
+          </div>
+          <div class="project-title">Neon Circuit</div>
+          <div class="project-desc">Arcade racing with custom vehicle physics, procedural track generation, and a retrowave visual identity. Designed and modeled all 6 vehicle assets from scratch.</div>
+        </div>
+        <div class="project-arrow">↗</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 3D DESIGN -->
+<section id="design">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">03 — 3D Art</div>
+      <h2 class="section-title">Art &amp;<br><span class="dim">design work</span></h2>
+      <div class="section-line"></div>
+    </div>
+
+<style>
+/* ===== 3D Art Grid v2 ===== */
+.dg2{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.dg2-full{grid-column:1/-1;}
+.dg2-wide{grid-column:span 2;}
+.dg2-half{grid-column:span 1;}
+/* ALL cards same uniform height */
+.dg2-item{position:relative;overflow:hidden;background:#050505;border:1px solid #181818;display:flex;flex-direction:column;transition:border-color 0.3s;aspect-ratio:4/3;}
+.dg2-item:hover{border-color:var(--accent);}
+.dg2-item svg{width:100%;height:100%;display:block;object-fit:contain;}
+.dg2-badge{position:absolute;bottom:0;left:0;right:0;padding:16px 20px;background:linear-gradient(to top,rgba(5,5,5,.96),transparent);transform:translateY(4px);opacity:0;transition:all .3s;}
+.dg2-item:hover .dg2-badge{opacity:1;transform:translateY(0);}
+.dg2-badge-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:#f0f0f0;}
+.dg2-badge-sub{font-size:11px;color:#666;margin-top:3px;}
+/* Character animations */
+@keyframes breathe{0%,100%{transform:scaleY(1) translateY(0)}50%{transform:scaleY(1.013) translateY(-2px)}}
+@keyframes visorPulse{0%,100%{opacity:.65}50%{opacity:1}}
+@keyframes corePulse{0%,100%{transform:scale(1);opacity:.65}50%{transform:scale(1.3);opacity:1}}
+@keyframes bodySway{0%,100%{transform:rotate(0deg) translateX(0)}33%{transform:rotate(.4deg) translateX(1px)}66%{transform:rotate(-.3deg) translateX(-1px)}}
+@keyframes envGlowA{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes scanLine{0%{transform:translateY(0)}100%{transform:translateY(680px)}}
+@media(max-width:900px){.dg2{grid-template-columns:1fr 1fr;}.dg2-full,.dg2-wide{grid-column:1/-1;}}
+@media(max-width:600px){.dg2{grid-template-columns:1fr 1fr;}.dg2-item{aspect-ratio:1/1 !important;max-height:220px;}}
+</style>
+
+    <div class="dg2 reveal">
+
+<!-- ════════════════════════════════════════════════════
+     1. LUXURY CAR  — Midnight Navy Grand Tourer
+════════════════════════════════════════════════════ -->
+<div class="dg2-item dg2-half dg2-env">
+<svg viewBox="0 0 1160 364" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+<defs>
+  <radialGradient id="studioBg" cx="50%" cy="35%"><stop offset="0%" stop-color="#0d0d1a"/><stop offset="70%" stop-color="#070710"/><stop offset="100%" stop-color="#030308"/></radialGradient>
+  <radialGradient id="studioKL" cx="75%" cy="15%"><stop offset="0%" stop-color="#14143c" stop-opacity=".6"/><stop offset="100%" stop-color="#000" stop-opacity="0"/></radialGradient>
+  <linearGradient id="navyBody" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#4a6ad8"/><stop offset="15%" stop-color="#1e3a90"/><stop offset="42%" stop-color="#0b1c60"/><stop offset="72%" stop-color="#070f3a"/><stop offset="100%" stop-color="#030820"/></linearGradient>
+  <linearGradient id="envSweep" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#000" stop-opacity=".55"/><stop offset="18%" stop-color="#3060c0" stop-opacity=".18"/><stop offset="32%" stop-color="#80a8ff" stop-opacity=".22"/><stop offset="44%" stop-color="#fff" stop-opacity=".2"/><stop offset="56%" stop-color="#80a8ff" stop-opacity=".14"/><stop offset="72%" stop-color="#000" stop-opacity=".12"/><stop offset="88%" stop-color="#3050a0" stop-opacity=".1"/><stop offset="100%" stop-color="#000" stop-opacity=".5"/></linearGradient>
+  <linearGradient id="rimFill" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="rgba(0,0,0,0)"/><stop offset="88%" stop-color="rgba(0,0,0,0)"/><stop offset="95%" stop-color="rgba(70,110,255,.45)"/><stop offset="100%" stop-color="rgba(100,150,255,.65)"/></linearGradient>
+  <radialGradient id="keyHL" cx="72%" cy="0%"><stop offset="0%" stop-color="rgba(255,255,255,.13)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>
+  <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0c1530"/><stop offset="40%" stop-color="#080f22"/><stop offset="100%" stop-color="#040810"/></linearGradient>
+  <linearGradient id="glassReflG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="rgba(170,200,255,.28)"/><stop offset="50%" stop-color="rgba(140,180,255,.1)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></linearGradient>
+  <radialGradient id="wheelRimG" cx="38%" cy="32%"><stop offset="0%" stop-color="#c8ccd4"/><stop offset="35%" stop-color="#80858f"/><stop offset="70%" stop-color="#38393e"/><stop offset="100%" stop-color="#14141a"/></radialGradient>
+  <radialGradient id="tireG" cx="38%" cy="28%"><stop offset="0%" stop-color="#1e1e1e"/><stop offset="100%" stop-color="#040404"/></radialGradient>
+  <linearGradient id="floorG" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#09091a"/><stop offset="100%" stop-color="#030310"/></linearGradient>
+  <radialGradient id="shadowG" cx="50%" cy="20%"><stop offset="0%" stop-color="rgba(0,0,0,.92)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>
+  <radialGradient id="hlight" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(200,220,255,.9)"/><stop offset="55%" stop-color="rgba(160,190,255,.35)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>
+  <radialGradient id="tailR" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(255,15,15,.85)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>
+  <linearGradient id="reflCar" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="rgba(30,55,170,.22)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></linearGradient>
+  <filter id="drl"><feGaussianBlur stdDeviation="2.5"/></filter>
+  <filter id="tailGlFx"><feGaussianBlur stdDeviation="3"/></filter>
+  <filter id="softBlur"><feGaussianBlur stdDeviation="10"/></filter>
+</defs>
+<!-- Studio BG -->
+<rect width="1160" height="364" fill="url(#studioBg)"/>
+<rect width="1160" height="364" fill="url(#studioKL)"/>
+<!-- Subtle grid on floor -->
+<rect x="0" y="302" width="1160" height="62" fill="url(#floorG)"/>
+<line x1="0" y1="302" x2="1160" y2="302" stroke="#10102a" stroke-width="1"/>
+<!-- Floor grid lines -->
+<g stroke="#0b0b1e" stroke-width=".5" opacity=".7">
+  <line x1="0" y1="330" x2="1160" y2="330"/><line x1="0" y1="345" x2="1160" y2="345"/>
+  <line x1="200" y1="302" x2="200" y2="364"/><line x1="400" y1="302" x2="400" y2="364"/>
+  <line x1="580" y1="302" x2="580" y2="364"/><line x1="760" y1="302" x2="760" y2="364"/><line x1="960" y1="302" x2="960" y2="364"/>
+</g>
+<!-- Car shadow -->
+<ellipse cx="582" cy="308" rx="446" ry="20" fill="url(#shadowG)" opacity=".95"/>
+<!-- Floor reflection (flipped car, faded) -->
+<g transform="translate(0,606) scale(1,-1)" opacity=".2">
+  <polygon points="148,310 166,286 192,262 212,250 510,238 568,188 582,184 748,182 808,226 858,246 894,274 1012,310 880,310 282,310" fill="url(#reflCar)"/>
+</g>
+<!-- ── CAR BODY ── -->
+<!-- Main shape: sleek grand tourer coupe -->
+<polygon points="148,310 166,286 192,262 212,250 510,238 568,188 582,184 748,182 808,226 858,246 894,274 1012,310 880,310 282,310" fill="url(#navyBody)"/>
+<!-- Metallic env reflection sweep -->
+<polygon points="148,310 166,286 192,262 212,250 510,238 568,188 582,184 748,182 808,226 858,246 894,274 1012,310 880,310 282,310" fill="url(#envSweep)"/>
+<!-- Key light from upper right -->
+<polygon points="148,310 166,286 192,262 212,250 510,238 568,188 582,184 748,182 808,226 858,246 894,274 1012,310 880,310 282,310" fill="url(#keyHL)"/>
+<!-- Rim fill light (left edge) -->
+<polygon points="148,310 166,286 192,262 212,250 510,238 568,188 582,184 748,182 808,226 858,246 894,274 1012,310 880,310 282,310" fill="url(#rimFill)"/>
+<!-- Specular highlights (upper body paint) -->
+<polygon points="252,252 482,240 564,190 582,186 598,189 526,242 272,258" fill="rgba(170,200,255,.2)"/>
+<polygon points="340,247 492,240 570,194 558,191 476,242 356,251" fill="rgba(220,235,255,.16)"/>
+<polygon points="420,243 510,238 572,194 558,192 488,240 438,246" fill="rgba(255,255,255,.2)"/>
+<!-- Lower body shadow / sill -->
+<polygon points="166,286 192,262 200,272 180,290 170,300 282,300 880,300 896,278 894,274 1012,310 880,310 282,310" fill="rgba(0,0,0,.52)"/>
+<!-- Sill chrome accent -->
+<line x1="212" y1="288" x2="890" y2="288" stroke="rgba(100,140,220,.28)" stroke-width="1.5"/>
+<!-- Character / shoulder line -->
+<path d="M 224,268 Q 490,256 766,264 Q 824,266 860,248" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="2.5"/>
+<path d="M 224,266 Q 490,254 766,262 Q 824,264 860,246" fill="none" stroke="rgba(100,140,255,.1)" stroke-width="1"/>
+<!-- Hood shut line -->
+<path d="M 502,240 L 218,254" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="1.5"/>
+
+<!-- ── GREENHOUSE / GLASS ── -->
+<!-- Window dark interior fill -->
+<polygon points="510,238 568,188 582,184 748,182 808,226 796,230 750,188 586,190 576,192 512,242" fill="#050810" opacity=".97"/>
+<!-- Windshield -->
+<polygon points="510,238 568,188 582,184 522,238" fill="url(#glassGrad)" opacity=".92"/>
+<polygon points="518,234 558,192 568,188 526,231" fill="url(#glassReflG)"/>
+<polygon points="534,228 554,206 562,200 538,226" fill="rgba(255,255,255,.11)"/>
+<!-- Main side glass -->
+<polygon points="582,184 748,182 796,228 750,190 588,192" fill="url(#glassGrad)" opacity=".92"/>
+<polygon points="594,188 744,186 788,226 748,192 598,194" fill="#040608" opacity=".85"/>
+<polygon points="594,189 700,187 720,188 660,190 598,192" fill="rgba(170,205,255,.09)"/>
+<!-- Rear window -->
+<polygon points="748,182 808,226 800,230 752,186" fill="url(#glassGrad)" opacity=".9"/>
+<polygon points="752,184 800,224 796,228 756,188" fill="rgba(90,140,255,.07)"/>
+<!-- A / C pillars -->
+<polygon points="568,188 510,238 504,236 562,186" fill="#090c18"/>
+<polygon points="748,182 808,226 804,228 752,184" fill="#090c18"/>
+<!-- B pillar -->
+<line x1="660" y1="185" x2="662" y2="228" stroke="#090c18" stroke-width="9"/>
+<!-- Roof crease highlight -->
+<line x1="576" y1="186" x2="748" y2="184" stroke="rgba(140,175,255,.14)" stroke-width="1.5"/>
+
+<!-- ── HEADLIGHTS ── -->
+<polygon points="150,278 176,260 196,268 182,284 162,290" fill="#04040c"/>
+<path d="M 158,270 Q 177,264 194,268" stroke="rgba(215,232,255,.95)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+<path d="M 158,270 Q 177,264 194,268" stroke="rgba(190,220,255,.5)" stroke-width="9" fill="none" stroke-linecap="round" filter="url(#drl)"/>
+<ellipse cx="173" cy="277" rx="10" ry="7" fill="#080810"/>
+<ellipse cx="173" cy="277" rx="6" ry="4" fill="rgba(200,220,255,.65)"/>
+<ellipse cx="136" cy="312" rx="42" ry="9" fill="rgba(170,205,255,.07)"/>
+<path d="M 152,284 Q 171,282 194,284" stroke="rgba(190,215,255,.38)" stroke-width="1.5" fill="none"/>
+
+<!-- ── TAILLIGHTS ── -->
+<polygon points="864,248 894,274 908,268 886,244" fill="#060408"/>
+<path d="M 871,250 L 892,272" stroke="rgba(255,12,12,.95)" stroke-width="5" fill="none" stroke-linecap="round"/>
+<path d="M 876,248 L 896,266" stroke="rgba(255,50,50,.55)" stroke-width="2" fill="none" stroke-linecap="round"/>
+<ellipse cx="886" cy="262" rx="18" ry="12" fill="rgba(255,8,8,.15)" filter="url(#tailGlFx)"/>
+
+<!-- ── MIRROR ── -->
+<polygon points="496,218 516,213 519,224 500,228" fill="#0a0c1c"/>
+<polygon points="498,219 514,214 516,222 500,226" fill="rgba(110,145,200,.22)"/>
+
+<!-- ── WHEELS ── -->
+<!-- Front wheel -->
+<g>
+  <circle cx="284" cy="312" r="62" fill="url(#tireG)"/>
+  <path d="M 250,262 A 40,40 0 0 1 318,262" stroke="rgba(45,45,45,.7)" stroke-width="5" fill="none"/>
+  <circle cx="284" cy="312" r="51" fill="url(#wheelRimG)"/>
+  <circle cx="284" cy="312" r="33" fill="#0d0d18"/>
+  <!-- 10 spokes -->
+  <g stroke="#9a9aa8" stroke-width="7" stroke-linecap="butt">
+    <line x1="284" y1="261" x2="284" y2="333"/><line x1="254" y1="273" x2="314" y2="351"/>
+    <line x1="254" y1="351" x2="314" y2="273"/><line x1="241" y1="312" x2="327" y2="312"/>
+    <line x1="248" y1="276" x2="320" y2="348"/><line x1="248" y1="348" x2="320" y2="276"/>
+  </g>
+  <g stroke="rgba(210,215,225,.42)" stroke-width="1.8" stroke-linecap="round" fill="none">
+    <line x1="284" y1="263" x2="284" y2="279"/><line x1="255" y1="274" x2="264" y2="284"/><line x1="243" y1="312" x2="259" y2="312"/>
+  </g>
+  <circle cx="284" cy="312" r="14" fill="#0b0b16"/>
+  <circle cx="284" cy="312" r="10" fill="#242430"/>
+  <circle cx="284" cy="312" r="7" fill="#161620"/>
+  <circle cx="284" cy="312" r="4" fill="#3a3a4a"/>
+  <circle cx="284" cy="312" r="2.5" fill="rgba(145,165,220,.85)"/>
+  <!-- Red brake caliper -->
+  <path d="M 268,270 A 45,45 0 0 1 300,267" stroke="#c00e0e" stroke-width="11" fill="none" stroke-linecap="butt" opacity=".88"/>
+  <path d="M 270,269 A 43,43 0 0 1 298,266" stroke="rgba(255,70,70,.3)" stroke-width="3" fill="none"/>
+  <circle cx="284" cy="312" r="31" fill="none" stroke="#181828" stroke-width="1.5"/>
+  <ellipse cx="284" cy="373" rx="54" ry="7" fill="rgba(0,0,0,.72)"/>
+</g>
+<!-- Rear wheel -->
+<g>
+  <circle cx="880" cy="312" r="62" fill="url(#tireG)"/>
+  <path d="M 846,262 A 40,40 0 0 1 914,262" stroke="rgba(45,45,45,.7)" stroke-width="5" fill="none"/>
+  <circle cx="880" cy="312" r="51" fill="url(#wheelRimG)"/>
+  <circle cx="880" cy="312" r="33" fill="#0d0d18"/>
+  <g stroke="#9a9aa8" stroke-width="7" stroke-linecap="butt">
+    <line x1="880" y1="261" x2="880" y2="333"/><line x1="850" y1="273" x2="910" y2="351"/>
+    <line x1="850" y1="351" x2="910" y2="273"/><line x1="837" y1="312" x2="923" y2="312"/>
+    <line x1="844" y1="276" x2="916" y2="348"/><line x1="844" y1="348" x2="916" y2="276"/>
+  </g>
+  <g stroke="rgba(210,215,225,.42)" stroke-width="1.8" stroke-linecap="round" fill="none">
+    <line x1="880" y1="263" x2="880" y2="279"/><line x1="851" y1="274" x2="860" y2="284"/><line x1="839" y1="312" x2="855" y2="312"/>
+  </g>
+  <circle cx="880" cy="312" r="14" fill="#0b0b16"/>
+  <circle cx="880" cy="312" r="10" fill="#242430"/>
+  <circle cx="880" cy="312" r="7" fill="#161620"/>
+  <circle cx="880" cy="312" r="4" fill="#3a3a4a"/>
+  <circle cx="880" cy="312" r="2.5" fill="rgba(145,165,220,.85)"/>
+  <path d="M 864,270 A 45,45 0 0 1 896,267" stroke="#c00e0e" stroke-width="11" fill="none" stroke-linecap="butt" opacity=".88"/>
+  <path d="M 866,269 A 43,43 0 0 1 894,266" stroke="rgba(255,70,70,.3)" stroke-width="3" fill="none"/>
+  <circle cx="880" cy="312" r="31" fill="none" stroke="#181828" stroke-width="1.5"/>
+  <ellipse cx="880" cy="373" rx="54" ry="7" fill="rgba(0,0,0,.72)"/>
+</g>
+<!-- Wheel arch lips -->
+<path d="M 210,310 A 78,70 0 0 1 358,310" fill="#050510" stroke="rgba(70,105,200,.2)" stroke-width="1.5"/>
+<path d="M 806,310 A 78,70 0 0 1 954,310" fill="#050510" stroke="rgba(70,105,200,.2)" stroke-width="1.5"/>
+
+<!-- ── BODY DETAILS ── -->
+<!-- Splitter -->
+<polygon points="148,310 170,300 212,298 212,305 174,308" fill="#04040c"/>
+<g stroke="#0d0d22" stroke-width="1"><line x1="164" y1="300" x2="164" y2="308"/><line x1="180" y1="299" x2="180" y2="307"/><line x1="196" y1="298" x2="196" y2="307"/></g>
+<!-- Rear diffuser -->
+<polygon points="954,310 930,300 894,298 894,305 932,308" fill="#04040c"/>
+<g stroke="#0d0d22" stroke-width="1"><line x1="906" y1="299" x2="905" y2="307"/><line x1="918" y1="299" x2="917" y2="307"/><line x1="930" y1="300" x2="929" y2="308"/></g>
+<!-- Exhaust quad tips -->
+<ellipse cx="942" cy="306" rx="7" ry="5" fill="#060614" stroke="#181828" stroke-width="1"/>
+<ellipse cx="957" cy="307" rx="7" ry="5" fill="#060614" stroke="#181828" stroke-width="1"/>
+<ellipse cx="942" cy="306" rx="4" ry="2.5" fill="rgba(70,90,180,.28)"/>
+<ellipse cx="957" cy="307" rx="4" ry="2.5" fill="rgba(70,90,180,.28)"/>
+<!-- Front emblem -->
+<circle cx="198" cy="252" r="9" fill="none" stroke="rgba(170,195,240,.5)" stroke-width="1.5"/>
+<circle cx="198" cy="252" r="5" fill="rgba(140,175,230,.28)"/>
+<!-- Flush door handle -->
+<rect x="572" y="268" width="36" height="8" rx="4" fill="#070918" stroke="rgba(90,130,220,.18)" stroke-width="1"/>
+<!-- Rear badge -->
+<circle cx="870" cy="242" r="7" fill="none" stroke="rgba(170,195,240,.5)" stroke-width="1.5"/>
+<circle cx="870" cy="242" r="4" fill="rgba(140,175,230,.22)"/>
+</svg>
+<div class="dg2-badge">
+  <div class="dg2-badge-title">Midnight GT — Luxury Grand Tourer · Blender 4.0 · Cycles Render · HDRI Studio Lighting</div>
+  <div class="dg2-badge-sub">Hard Surface Modeling · PBR Metallic Paint · Node Shader · 64-sample Denoised · 4K Output</div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     2. ANIMATED RIGGED CHARACTER
+════════════════════════════════════════════════════ -->
+<div class="dg2-item dg2-half dg2-char">
+<svg viewBox="0 0 480 680" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="cBg" cx="50%" cy="42%"><stop offset="0%" stop-color="#0e091a"/><stop offset="100%" stop-color="#030208"/></radialGradient>
+  <linearGradient id="aMain" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2e2e3e"/><stop offset="45%" stop-color="#1c1c28"/><stop offset="100%" stop-color="#0c0c14"/></linearGradient>
+  <linearGradient id="aHL" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgba(0,0,0,0)"/><stop offset="45%" stop-color="rgba(255,255,255,.07)"/><stop offset="65%" stop-color="rgba(255,255,255,.13)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></linearGradient>
+  <linearGradient id="cPlate" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#3c3c50"/><stop offset="35%" stop-color="#28283a"/><stop offset="100%" stop-color="#111118"/></linearGradient>
+  <linearGradient id="rimR" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgba(0,0,0,0)"/><stop offset="84%" stop-color="rgba(0,0,0,0)"/><stop offset="94%" stop-color="rgba(80,130,255,.5)"/><stop offset="100%" stop-color="rgba(110,160,255,.7)"/></linearGradient>
+  <radialGradient id="cFloor" cx="50%" cy="8%"><stop offset="0%" stop-color="rgba(0,0,0,.8)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>
+  <filter id="aGlow"><feGaussianBlur stdDeviation="4"/></filter>
+  <filter id="aSGlow"><feGaussianBlur stdDeviation="2"/></filter>
+</defs>
+<rect width="480" height="680" fill="url(#cBg)"/>
+<ellipse cx="240" cy="360" rx="190" ry="295" fill="rgba(80,55,130,.05)"/>
+<!-- Scan line animation -->
+<rect x="0" y="0" width="480" height="3" fill="rgba(232,255,71,.025)" style="animation:scanLine 5s linear infinite;"/>
+<!-- Floor shadow -->
+<ellipse cx="240" cy="648" rx="100" ry="14" fill="rgba(0,0,0,.75)"/>
+<ellipse cx="240" cy="648" rx="110" ry="18" fill="url(#cFloor)"/>
+<!-- Hologram ring -->
+<ellipse cx="240" cy="648" rx="92" ry="14" fill="none" stroke="rgba(232,255,71,.14)" stroke-width="1" stroke-dasharray="5 7" style="animation:corePulse 3.5s ease-in-out infinite;"/>
+
+<!-- CAPE (behind, swaying) -->
+<g style="transform-origin:240px 340px;animation:bodySway 6s ease-in-out infinite;">
+  <path d="M 198,334 Q 172,430 165,575 Q 163,612 170,648 L 198,648 Q 192,612 196,575 Q 208,438 222,342 Z" fill="url(#aMain)" opacity=".65"/>
+  <path d="M 282,334 Q 308,430 315,575 Q 317,612 310,648 L 282,648 Q 288,612 284,575 Q 272,438 258,342 Z" fill="url(#aMain)" opacity=".65"/>
+  <path d="M 198,334 Q 172,430 165,575 Q 163,612 170,648" fill="none" stroke="rgba(100,75,190,.32)" stroke-width="1.5"/>
+  <path d="M 282,334 Q 308,430 315,575 Q 317,612 310,648" fill="none" stroke="rgba(80,130,255,.38)" stroke-width="2"/>
+</g>
+
+<!-- FULL BODY SWAY GROUP -->
+<g style="transform-origin:240px 420px;animation:bodySway 8s ease-in-out infinite;">
+
+<!-- LEGS -->
+<polygon points="186,496 220,496 216,648 182,648" fill="url(#aMain)"/>
+<polygon points="188,514 218,514 216,576 190,576" fill="url(#cPlate)"/>
+<polygon points="190,516 216,516 214,574 192,574" fill="url(#aHL)"/>
+<line x1="186" y1="496" x2="182" y2="648" stroke="rgba(80,130,255,.3)" stroke-width="1.5"/>
+<rect x="190" y="578" width="28" height="14" rx="5" fill="#282835"/>
+<rect x="192" y="579" width="24" height="9" rx="4" fill="rgba(255,255,255,.06)"/>
+<polygon points="180,642 222,642 228,656 175,656" fill="#1c1c28"/>
+
+<polygon points="260,496 294,496 298,648 264,648" fill="url(#aMain)"/>
+<polygon points="262,514 292,514 290,576 264,576" fill="url(#cPlate)"/>
+<polygon points="264,516 290,516 288,574 266,574" fill="url(#aHL)"/>
+<line x1="294" y1="496" x2="298" y2="648" stroke="rgba(80,130,255,.42)" stroke-width="2"/>
+<rect x="262" y="578" width="28" height="14" rx="5" fill="#282835"/>
+<rect x="264" y="579" width="24" height="9" rx="4" fill="rgba(255,255,255,.06)"/>
+<polygon points="258,642 300,642 304,656 254,656" fill="#1c1c28"/>
+
+<!-- WAIST -->
+<polygon points="176,486 304,486 298,500 182,500" fill="#242235"/>
+<rect x="182" y="492" width="116" height="4" rx="2" fill="rgba(232,255,71,.14)"/>
+
+<!-- TORSO (breathing) -->
+<g style="transform-origin:240px 390px;animation:breathe 4.5s ease-in-out infinite;">
+  <polygon points="166,316 314,316 304,496 176,496" fill="url(#aMain)"/>
+  <polygon points="166,316 314,316 304,496 176,496" fill="url(#rimR)"/>
+  <polygon points="178,322 302,322 296,438 184,438" fill="url(#cPlate)"/>
+  <polygon points="180,324 300,324 294,436 186,436" fill="url(#aHL)"/>
+  <line x1="240" y1="322" x2="240" y2="438" stroke="rgba(0,0,0,.5)" stroke-width="3"/>
+  <!-- Pec plates -->
+  <polygon points="184,326 236,326 233,366 182,366" fill="#303042" stroke="#1c1c2c" stroke-width="1"/>
+  <polygon points="244,326 296,326 298,366 246,366" fill="#303042" stroke="#1c1c2c" stroke-width="1"/>
+  <polygon points="185,327 235,327 232,332 185,332" fill="rgba(255,255,255,.06)"/>
+  <polygon points="245,327 295,327 295,332 245,332" fill="rgba(255,255,255,.06)"/>
+  <!-- Abs -->
+  <rect x="196" y="374" width="88" height="13" rx="3" fill="#262636" stroke="#1c1c2c" stroke-width="1"/>
+  <rect x="198" y="375" width="84" height="4" rx="2" fill="rgba(255,255,255,.05)"/>
+  <rect x="196" y="391" width="88" height="13" rx="3" fill="#262636" stroke="#1c1c2c" stroke-width="1"/>
+  <rect x="196" y="408" width="88" height="13" rx="3" fill="#262636" stroke="#1c1c2c" stroke-width="1"/>
+  <!-- Energy core -->
+  <circle cx="240" cy="354" r="23" fill="rgba(232,255,71,.04)" style="animation:corePulse 3s ease-in-out infinite;"/>
+  <circle cx="240" cy="354" r="16" fill="#0a0a10" stroke="rgba(232,255,71,.65)" stroke-width="1.5"/>
+  <circle cx="240" cy="354" r="11" fill="#0f0f1a"/>
+  <circle cx="240" cy="354" r="8" fill="rgba(232,255,71,.22)" style="animation:corePulse 3s ease-in-out infinite;"/>
+  <circle cx="240" cy="354" r="5" fill="rgba(232,255,71,.55)" style="animation:corePulse 3s ease-in-out .5s infinite;"/>
+  <circle cx="240" cy="354" r="2.5" fill="rgba(255,255,200,.95)"/>
+  <g stroke="rgba(232,255,71,.38)" stroke-width="1" style="animation:corePulse 3s ease-in-out infinite;">
+    <line x1="240" y1="338" x2="240" y2="334"/><line x1="256" y1="354" x2="260" y2="354"/>
+    <line x1="240" y1="370" x2="240" y2="374"/><line x1="224" y1="354" x2="220" y2="354"/>
+  </g>
+  <!-- Side vents -->
+  <rect x="166" y="346" width="12" height="52" rx="3" fill="#1e1e2c"/>
+  <g stroke="rgba(232,255,71,.2)" stroke-width="1"><line x1="168" y1="354" x2="178" y2="354"/><line x1="168" y1="360" x2="178" y2="360"/><line x1="168" y1="366" x2="178" y2="366"/><line x1="168" y1="372" x2="178" y2="372"/></g>
+  <rect x="302" y="346" width="12" height="52" rx="3" fill="#1e1e2c"/>
+  <g stroke="rgba(232,255,71,.2)" stroke-width="1"><line x1="302" y1="354" x2="312" y2="354"/><line x1="302" y1="360" x2="312" y2="360"/><line x1="302" y1="366" x2="312" y2="366"/><line x1="302" y1="372" x2="312" y2="372"/></g>
+  <!-- PAULDRONS -->
+  <polygon points="96,274 170,274 166,348 86,348" fill="#2c2c3c"/>
+  <polygon points="98,276 168,276 164,346 88,346" fill="url(#aHL)"/>
+  <line x1="98" y1="294" x2="166" y2="294" stroke="#1a1a28" stroke-width="2"/>
+  <line x1="94" y1="320" x2="164" y2="320" stroke="#1a1a28" stroke-width="2"/>
+  <line x1="96" y1="274" x2="86" y2="348" stroke="rgba(100,75,200,.42)" stroke-width="3"/>
+  <circle cx="106" cy="284" r="4" fill="rgba(232,255,71,.42)" style="animation:corePulse 4.5s ease-in-out 1s infinite;"/>
+  <polygon points="310,274 384,274 394,348 314,348" fill="#2c2c3c"/>
+  <polygon points="312,276 382,276 392,346 316,346" fill="url(#aHL)"/>
+  <line x1="314" y1="294" x2="382" y2="294" stroke="#1a1a28" stroke-width="2"/>
+  <line x1="316" y1="320" x2="386" y2="320" stroke="#1a1a28" stroke-width="2"/>
+  <line x1="384" y1="274" x2="394" y2="348" stroke="rgba(80,130,255,.55)" stroke-width="3"/>
+  <line x1="384" y1="274" x2="394" y2="348" stroke="rgba(255,255,255,.1)" stroke-width="2"/>
+  <circle cx="374" cy="284" r="4" fill="rgba(232,255,71,.42)" style="animation:corePulse 4.5s ease-in-out .5s infinite;"/>
+  <!-- ARMS -->
+  <polygon points="128,348 168,348 162,438 122,438" fill="url(#aMain)"/>
+  <rect x="126" y="362" width="38" height="50" rx="4" fill="#24243a"/>
+  <rect x="128" y="364" width="34" height="13" rx="3" fill="rgba(255,255,255,.05)"/>
+  <ellipse cx="144" cy="438" rx="18" ry="12" fill="#1e1e2c" stroke="#141420" stroke-width="1.5"/>
+  <polygon points="124,438 164,438 160,518 120,518" fill="url(#aMain)"/>
+  <polygon points="118,514 166,514 170,534 114,534" fill="#1c1c2a"/>
+  <line x1="128" y1="348" x2="120" y2="518" stroke="rgba(100,75,190,.38)" stroke-width="2"/>
+  <polygon points="312,348 352,348 358,438 318,438" fill="url(#aMain)"/>
+  <rect x="316" y="362" width="38" height="50" rx="4" fill="#24243a"/>
+  <rect x="318" y="364" width="34" height="13" rx="3" fill="rgba(255,255,255,.06)"/>
+  <ellipse cx="336" cy="438" rx="18" ry="12" fill="#1e1e2c" stroke="#141420" stroke-width="1.5"/>
+  <polygon points="316,438 356,438 360,518 320,518" fill="url(#aMain)"/>
+  <polygon points="314,514 362,514 366,534 310,534" fill="#1c1c2a"/>
+  <line x1="352" y1="348" x2="360" y2="518" stroke="rgba(80,130,255,.52)" stroke-width="2.5"/>
+  <!-- NECK & GORGET -->
+  <rect x="220" y="264" width="40" height="54" rx="6" fill="#1c1c28"/>
+  <polygon points="186,284 294,284 304,318 176,318" fill="#272740"/>
+  <polygon points="188,285 292,285 302,316 178,316" fill="url(#aHL)"/>
+</g>
+
+<!-- HEAD (separate sway) -->
+<g style="transform-origin:240px 192px;animation:bodySway 10s ease-in-out 1.2s infinite;">
+  <ellipse cx="240" cy="197" rx="60" ry="70" fill="url(#aMain)"/>
+  <ellipse cx="240" cy="197" rx="60" ry="70" fill="url(#rimR)" opacity=".8"/>
+  <!-- Face plate -->
+  <polygon points="190,173 290,173 294,234 186,234" fill="#242238"/>
+  <polygon points="192,174 288,174 292,232 188,232" fill="url(#aHL)"/>
+  <!-- Helmet top crest -->
+  <polygon points="218,130 262,130 268,172 212,172" fill="#2a2a3c"/>
+  <line x1="218" y1="130" x2="262" y2="130" stroke="rgba(232,255,71,.32)" stroke-width="2"/>
+  <!-- VISOR -->
+  <polygon points="198,181 282,181 284,222 196,222" fill="#06060e"/>
+  <polygon points="200,183 280,183 282,220 198,220" fill="#030308"/>
+  <!-- Visor scan glow -->
+  <polygon points="200,183 280,183 282,220 198,220" fill="rgba(232,255,71,.09)" style="animation:visorPulse 3s ease-in-out infinite;"/>
+  <rect x="200" y="198" width="82" height="4" rx="2" fill="rgba(232,255,71,.42)" style="animation:visorPulse 3s ease-in-out infinite;"/>
+  <polygon points="200,183 280,183 282,220 198,220" fill="none" stroke="rgba(232,255,71,.5)" stroke-width="1.5" style="animation:visorPulse 3s ease-in-out infinite;" filter="url(#aGlow)"/>
+  <!-- Visor corner brackets -->
+  <path d="M 200,188 L 208,188 L 208,183" fill="none" stroke="rgba(232,255,71,.65)" stroke-width="1.5"/>
+  <path d="M 280,188 L 272,188 L 272,183" fill="none" stroke="rgba(232,255,71,.65)" stroke-width="1.5"/>
+  <path d="M 200,217 L 208,217 L 208,222" fill="none" stroke="rgba(232,255,71,.65)" stroke-width="1.5"/>
+  <path d="M 280,217 L 272,217 L 272,222" fill="none" stroke="rgba(232,255,71,.65)" stroke-width="1.5"/>
+  <!-- Ear armor -->
+  <ellipse cx="182" cy="203" rx="14" ry="23" fill="#1e1e30"/>
+  <ellipse cx="180" cy="203" rx="8" ry="14" fill="#141420"/>
+  <circle cx="178" cy="201" r="3" fill="rgba(232,255,71,.5)" style="animation:corePulse 5.5s ease-in-out 2s infinite;"/>
+  <ellipse cx="298" cy="203" rx="14" ry="23" fill="#1e1e30"/>
+  <ellipse cx="300" cy="203" rx="8" ry="14" fill="#141420"/>
+  <circle cx="302" cy="201" r="3" fill="rgba(232,255,71,.5)" style="animation:corePulse 5.5s ease-in-out 2.5s infinite;"/>
+  <!-- Chin guard -->
+  <polygon points="210,232 270,232 268,256 212,256" fill="#222238"/>
+  <line x1="212" y1="244" x2="268" y2="244" stroke="rgba(0,0,0,.5)" stroke-width="1.5"/>
+  <!-- Top strip -->
+  <line x1="222" y1="132" x2="258" y2="132" stroke="rgba(232,255,71,.72)" stroke-width="2" stroke-linecap="round" style="animation:visorPulse 4s ease-in-out infinite;"/>
+  <!-- Neck AO -->
+  <ellipse cx="240" cy="266" rx="55" ry="9" fill="rgba(0,0,0,.52)"/>
+</g>
+
+</g><!-- end body sway -->
+
+<!-- Ambient particles -->
+<g fill="rgba(232,255,71,.4)">
+  <circle cx="138" cy="305" r="1.5" style="animation:corePulse 6s ease-in-out infinite;"/>
+  <circle cx="352" cy="285" r="1" style="animation:corePulse 7s ease-in-out 1s infinite;"/>
+  <circle cx="118" cy="430" r="1" style="animation:corePulse 5s ease-in-out 2s infinite;"/>
+  <circle cx="372" cy="390" r="1.5" style="animation:corePulse 8s ease-in-out .5s infinite;"/>
+</g>
+</svg>
+<div class="dg2-badge">
+  <div class="dg2-badge-title">Sentinel MK-VII — Animated Rigged Character</div>
+  <div class="dg2-badge-sub">Blender Armature · 64-bone Rig · PBR Armor · Idle Breathing · Real-time Shader</div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     3. EPIC GAME ENVIRONMENT  — Sanctum Corridor
+════════════════════════════════════════════════════ -->
+<div class="dg2-item dg2-half">
+<svg viewBox="0 0 700 467" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+<defs>
+  <radialGradient id="envBg" cx="50%" cy="50%"><stop offset="0%" stop-color="#18103a"/><stop offset="55%" stop-color="#0c0820"/><stop offset="100%" stop-color="#040210"/></radialGradient>
+  <linearGradient id="floorM" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#131028"/><stop offset="100%" stop-color="#060515"/></linearGradient>
+  <linearGradient id="ceilM" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#100e24"/><stop offset="100%" stop-color="#040312"/></linearGradient>
+  <linearGradient id="wallL" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#0f0d28"/><stop offset="100%" stop-color="#040415"/></linearGradient>
+  <linearGradient id="wallR" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#0f0d28"/><stop offset="100%" stop-color="#040415"/></linearGradient>
+  <linearGradient id="vLight1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="rgba(155,115,255,.52)"/><stop offset="45%" stop-color="rgba(120,88,230,.24)"/><stop offset="100%" stop-color="rgba(80,55,180,0)"/></linearGradient>
+  <linearGradient id="vLight2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="rgba(200,165,255,.48)"/><stop offset="50%" stop-color="rgba(160,125,245,.2)"/><stop offset="100%" stop-color="rgba(100,75,200,0)"/></linearGradient>
+  <linearGradient id="floorRefl" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="rgba(135,98,255,.26)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></linearGradient>
+  <radialGradient id="portalGlow" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(210,168,255,.92)"/><stop offset="30%" stop-color="rgba(145,105,255,.52)"/><stop offset="65%" stop-color="rgba(85,50,190,.2)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>
+  <radialGradient id="vign" cx="50%" cy="50%"><stop offset="55%" stop-color="rgba(0,0,0,0)"/><stop offset="100%" stop-color="rgba(0,0,10,.65)"/></radialGradient>
+  <filter id="envGFx"><feGaussianBlur stdDeviation="5"/></filter>
+  <filter id="envGSm"><feGaussianBlur stdDeviation="2"/></filter>
+</defs>
+<!-- VP = (350, 234) -->
+<rect width="700" height="467" fill="url(#envBg)"/>
+<!-- FLOOR -->
+<polygon points="0,467 700,467 350,234" fill="url(#floorM)"/>
+<!-- Floor tiles -->
+<g stroke="#0e0d26" stroke-width=".7" opacity=".8">
+  <line x1="0" y1="467" x2="350" y2="234"/><line x1="70" y1="467" x2="350" y2="234"/>
+  <line x1="140" y1="467" x2="350" y2="234"/><line x1="210" y1="467" x2="350" y2="234"/>
+  <line x1="280" y1="467" x2="350" y2="234"/><line x1="350" y1="467" x2="350" y2="234"/>
+  <line x1="420" y1="467" x2="350" y2="234"/><line x1="490" y1="467" x2="350" y2="234"/>
+  <line x1="560" y1="467" x2="350" y2="234"/><line x1="630" y1="467" x2="350" y2="234"/>
+  <line x1="700" y1="467" x2="350" y2="234"/>
+  <line x1="0" y1="360" x2="700" y2="360"/><line x1="14" y1="300" x2="686" y2="300"/>
+  <line x1="55" y1="264" x2="645" y2="264"/><line x1="120" y1="250" x2="580" y2="250"/>
+  <line x1="190" y1="242" x2="510" y2="242"/>
+</g>
+<!-- Floor glow strips -->
+<g style="animation:envGlowA 4.5s ease-in-out infinite;">
+  <polygon points="314,467 344,467 350,234" fill="rgba(138,98,255,.22)"/>
+  <polygon points="356,467 386,467 350,234" fill="rgba(138,98,255,.22)"/>
+</g>
+<polygon points="316,467 342,467 350,380" fill="url(#floorRefl)" opacity=".5"/>
+<polygon points="358,467 384,467 350,380" fill="url(#floorRefl)" opacity=".5"/>
+<!-- Floor sheen -->
+<polygon points="0,467 700,467 700,385 0,385" fill="rgba(138,98,255,.03)"/>
+<!-- CEILING -->
+<polygon points="0,0 700,0 350,234" fill="url(#ceilM)"/>
+<g stroke="#0b0920" stroke-width=".7" opacity=".7">
+  <line x1="0" y1="0" x2="350" y2="234"/><line x1="175" y1="0" x2="350" y2="234"/>
+  <line x1="350" y1="0" x2="350" y2="234"/><line x1="525" y1="0" x2="350" y2="234"/><line x1="700" y1="0" x2="350" y2="234"/>
+  <line x1="0" y1="78" x2="700" y2="78"/><line x1="10" y1="140" x2="690" y2="140"/><line x1="42" y1="184" x2="658" y2="184"/>
+</g>
+<!-- LEFT WALL -->
+<polygon points="0,0 0,467 350,234" fill="url(#wallL)"/>
+<g stroke="#0c0b26" stroke-width=".8" opacity=".9">
+  <line x1="0" y1="58" x2="350" y2="234"/><line x1="0" y1="138" x2="350" y2="234"/>
+  <line x1="0" y1="220" x2="350" y2="234"/><line x1="0" y1="300" x2="350" y2="234"/>
+  <line x1="0" y1="380" x2="350" y2="234"/><line x1="0" y1="458" x2="350" y2="234"/>
+</g>
+<!-- Left wall glow strip -->
+<polygon points="0,226 0,242 350,234" fill="rgba(138,98,255,.38)" style="animation:envGlowA 4s ease-in-out infinite;"/>
+<polygon points="0,208 0,260 350,234" fill="rgba(138,98,255,.07)" filter="url(#envGFx)"/>
+<!-- RIGHT WALL -->
+<polygon points="700,0 700,467 350,234" fill="url(#wallR)"/>
+<g stroke="#0c0b26" stroke-width=".8" opacity=".9">
+  <line x1="700" y1="58" x2="350" y2="234"/><line x1="700" y1="138" x2="350" y2="234"/>
+  <line x1="700" y1="220" x2="350" y2="234"/><line x1="700" y1="300" x2="350" y2="234"/>
+  <line x1="700" y1="380" x2="350" y2="234"/><line x1="700" y1="458" x2="350" y2="234"/>
+</g>
+<polygon points="700,226 700,242 350,234" fill="rgba(138,98,255,.38)" style="animation:envGlowA 4s ease-in-out .6s infinite;"/>
+<polygon points="700,208 700,260 350,234" fill="rgba(138,98,255,.07)" filter="url(#envGFx)"/>
+
+<!-- COLUMNS LEFT -->
+<polygon points="0,0 46,0 184,234 0,234" fill="#0d0b20"/>
+<polygon points="0,467 46,467 184,234 0,234" fill="#0a0818"/>
+<line x1="46" y1="0" x2="184" y2="234" stroke="rgba(138,98,255,.55)" stroke-width="2"/>
+<line x1="46" y1="467" x2="184" y2="234" stroke="rgba(138,98,255,.42)" stroke-width="1.5"/>
+<polygon points="0,0 46,0 52,9 0,9" fill="rgba(160,118,255,.32)"/>
+<polygon points="0,458 46,467 52,458 0,458" fill="rgba(160,118,255,.22)"/>
+<polygon points="128,0 160,0 256,234 218,234" fill="#0c0a20"/>
+<polygon points="128,467 160,467 256,234 218,234" fill="#09071c"/>
+<line x1="160" y1="0" x2="256" y2="234" stroke="rgba(138,98,255,.36)" stroke-width="1.5"/>
+<line x1="160" y1="467" x2="256" y2="234" stroke="rgba(138,98,255,.26)" stroke-width="1"/>
+<polygon points="232,0 248,0 305,234 284,234" fill="#0c0a22" opacity=".85"/>
+<polygon points="232,467 248,467 305,234 284,234" fill="#090818" opacity=".85"/>
+<line x1="248" y1="0" x2="305" y2="234" stroke="rgba(138,98,255,.24)" stroke-width="1"/>
+<!-- COLUMNS RIGHT -->
+<polygon points="654,0 700,0 700,234 516,234" fill="#0d0b20"/>
+<polygon points="654,467 700,467 700,234 516,234" fill="#0a0818"/>
+<line x1="654" y1="0" x2="516" y2="234" stroke="rgba(138,98,255,.55)" stroke-width="2"/>
+<line x1="654" y1="467" x2="516" y2="234" stroke="rgba(138,98,255,.42)" stroke-width="1.5"/>
+<polygon points="654,0 700,0 700,9 648,9" fill="rgba(160,118,255,.32)"/>
+<polygon points="654,458 700,467 700,458 648,458" fill="rgba(160,118,255,.22)"/>
+<polygon points="540,0 572,0 484,234 444,234" fill="#0c0a20"/>
+<polygon points="540,467 572,467 484,234 444,234" fill="#09071c"/>
+<line x1="540" y1="0" x2="444" y2="234" stroke="rgba(138,98,255,.36)" stroke-width="1.5"/>
+<line x1="540" y1="467" x2="444" y2="234" stroke="rgba(138,98,255,.26)" stroke-width="1"/>
+<polygon points="452,0 468,0 396,234 416,234" fill="#0c0a22" opacity=".85"/>
+<polygon points="452,467 468,467 396,234 416,234" fill="#090818" opacity=".85"/>
+
+<!-- CEILING CENTER LIGHT BAR -->
+<polygon points="282,0 418,0 364,234 336,234" fill="rgba(175,148,255,.12)"/>
+<polygon points="332,0 368,0 355,234 345,234" fill="rgba(200,170,255,.2)"/>
+<line x1="350" y1="0" x2="350" y2="234" stroke="rgba(225,205,255,.65)" stroke-width="2" style="animation:envGlowA 4s ease-in-out infinite;"/>
+
+<!-- VOL LIGHT BEAMS -->
+<polygon points="328,0 372,0 382,234 318,234" fill="url(#vLight1)" opacity=".65"/>
+<polygon points="338,0 362,0 357,234 343,234" fill="url(#vLight2)" opacity=".55"/>
+<ellipse cx="350" cy="234" rx="38" ry="13" fill="rgba(158,128,255,.22)" filter="url(#envGSm)"/>
+<polygon points="56,0 98,0 202,234 168,234" fill="rgba(138,108,255,.1)"/>
+<line x1="78" y1="0" x2="188" y2="234" stroke="rgba(180,150,255,.14)" stroke-width="1"/>
+<polygon points="602,0 644,0 532,234 498,234" fill="rgba(138,108,255,.1)"/>
+<line x1="622" y1="0" x2="512" y2="234" stroke="rgba(180,150,255,.14)" stroke-width="1"/>
+
+<!-- PORTAL / VP GLOW -->
+<circle cx="350" cy="234" r="82" fill="url(#portalGlow)" style="animation:envGlowA 5s ease-in-out infinite;"/>
+<circle cx="350" cy="234" r="56" fill="rgba(178,138,255,.26)" style="animation:envGlowA 5s ease-in-out .5s infinite;"/>
+<circle cx="350" cy="234" r="32" fill="rgba(210,178,255,.42)" style="animation:envGlowA 5s ease-in-out 1s infinite;"/>
+<circle cx="350" cy="234" r="14" fill="rgba(242,222,255,.85)"/>
+<circle cx="350" cy="234" r="62" fill="none" stroke="rgba(200,158,255,.42)" stroke-width="2" stroke-dasharray="7 5" style="animation:envGlowA 3.5s ease-in-out infinite;"/>
+
+<!-- DISTANT FIGURE silhouette -->
+<g opacity=".72">
+  <ellipse cx="350" cy="220" rx="6" ry="8" fill="#1a1230"/>
+  <rect x="345" y="228" width="10" height="16" rx="2" fill="#1a1230"/>
+  <rect x="339" y="230" width="6" height="12" rx="2" fill="#14102a"/>
+  <rect x="355" y="230" width="6" height="12" rx="2" fill="#14102a"/>
+  <rect x="346" y="244" width="5" height="13" rx="2" fill="#14102a"/>
+  <rect x="352" y="244" width="5" height="13" rx="2" fill="#14102a"/>
+  <ellipse cx="350" cy="232" rx="14" ry="24" fill="none" stroke="rgba(200,158,255,.3)" stroke-width="3"/>
+</g>
+
+<!-- Dust particles -->
+<g fill="rgba(200,168,255,.5)">
+  <circle cx="182" cy="148" r="1.2" style="animation:corePulse 6s ease-in-out infinite;"/>
+  <circle cx="522" cy="118" r="1" style="animation:corePulse 7s ease-in-out 1s infinite;"/>
+  <circle cx="258" cy="305" r=".8" style="animation:corePulse 5s ease-in-out 2s infinite;"/>
+  <circle cx="462" cy="282" r="1.2" style="animation:corePulse 8s ease-in-out .5s infinite;"/>
+  <circle cx="350" cy="168" r="1" style="animation:corePulse 4.5s ease-in-out 3s infinite;"/>
+  <circle cx="298" cy="382" r=".8" style="animation:corePulse 6.5s ease-in-out 1.5s infinite;"/>
+  <circle cx="402" cy="358" r="1" style="animation:corePulse 7s ease-in-out 2.5s infinite;"/>
+</g>
+<!-- Vignette -->
+<rect width="700" height="467" fill="url(#vigEnv)"/>
+<radialGradient id="vigEnv" cx="50%" cy="50%"><stop offset="52%" stop-color="rgba(0,0,0,0)"/><stop offset="100%" stop-color="rgba(0,0,8,.62)"/></radialGradient>
+</svg>
+<div class="dg2-badge">
+  <div class="dg2-badge-title">Sanctum Corridor — Real-time Game Environment</div>
+  <div class="dg2-badge-sub">UE5 Lumen · Volumetric Fog · Nanite Geometry · Modular Kit · Atmospheric Scattering</div>
+</div>
+</div>
+
+<!-- ════════ 4. PORTAL SHADER ════════ -->
+<div class="dg2-item dg2-half">
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="p3" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(232,255,71,.38)"/><stop offset="42%" stop-color="rgba(0,255,204,.13)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>
+  <rect width="400" height="400" fill="#060610"/>
+  <circle cx="200" cy="200" r="130" fill="url(#p3)"/>
+  <circle cx="200" cy="200" r="122" fill="none" stroke="#e8ff47" stroke-width="1.5" opacity=".55" stroke-dasharray="8 4" style="animation:corePulse 4s ease-in-out infinite;"/>
+  <circle cx="200" cy="200" r="102" fill="none" stroke="#00ffcc" stroke-width=".8" opacity=".38" stroke-dasharray="4 6"/>
+  <circle cx="200" cy="200" r="82" fill="none" stroke="#e8ff47" stroke-width="1" opacity=".45" style="animation:corePulse 3s ease-in-out 1s infinite;"/>
+  <circle cx="200" cy="200" r="55" fill="none" stroke="#fff" stroke-width=".5" opacity=".2"/>
+  <circle cx="200" cy="200" r="35" fill="#e8ff47" opacity=".08" style="animation:corePulse 3s ease-in-out infinite;"/>
+  <circle cx="200" cy="200" r="18" fill="#e8ff47" opacity=".2" style="animation:corePulse 3s ease-in-out .5s infinite;"/>
+  <circle cx="200" cy="200" r="7" fill="#fff" opacity=".72"/>
+  <g fill="#e8ff47" opacity=".32" font-size="14" font-family="monospace">
+    <text x="100" y="100">⬡</text><text x="280" y="90">⬡</text>
+    <text x="60" y="220">⬡</text><text x="320" y="230">⬡</text>
+    <text x="140" y="320">⬡</text><text x="250" y="315">⬡</text>
+  </g>
+</svg>
+<div class="dg2-badge"><div class="dg2-badge-title">Portal VFX Shader</div><div class="dg2-badge-sub">Unity HLSL · ShaderGraph · Particle System</div></div>
+</div>
+
+<!-- ════════ 5. SCOUT SHIP ════════ -->
+<div class="dg2-item dg2-half">
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" fill="#050812"/>
+  <defs>
+    <radialGradient id="shipBg" cx="50%" cy="50%"><stop offset="0%" stop-color="#0a0f28"/><stop offset="100%" stop-color="#030510"/></radialGradient>
+    <linearGradient id="shipBody" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#3a3a55"/><stop offset="40%" stop-color="#1e1e35"/><stop offset="100%" stop-color="#0a0a18"/></linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#shipBg)"/>
+  <polygon points="200,62 242,202 200,242 158,202" fill="url(#shipBody)"/>
+  <polygon points="200,62 242,202 200,242 158,202" fill="none" stroke="#e8ff47" stroke-width="1.2" opacity=".6"/>
+  <polygon points="158,202 76,264 120,284 200,242" fill="#131325" stroke="#e8ff47" stroke-width=".6" opacity=".5"/>
+  <polygon points="242,202 324,264 280,284 200,242" fill="#131325" stroke="#e8ff47" stroke-width=".6" opacity=".5"/>
+  <ellipse cx="200" cy="247" rx="19" ry="11" fill="#e8ff47" opacity=".42"/>
+  <ellipse cx="200" cy="252" rx="12" ry="7" fill="#fff" opacity=".52"/>
+  <ellipse cx="200" cy="132" rx="17" ry="23" fill="#e8ff47" opacity=".14"/>
+  <ellipse cx="200" cy="132" rx="14" ry="21" fill="none" stroke="#e8ff47" stroke-width=".8" opacity=".52"/>
+  <g fill="rgba(232,255,71,.2)" style="animation:corePulse 5s ease-in-out infinite;">
+    <circle cx="200" cy="180" r="100" fill="none" stroke="#e8ff47" stroke-width=".4" opacity=".12" stroke-dasharray="2 6"/>
+  </g>
+  <!-- Star field -->
+  <g fill="#ffffff"><circle cx="50" cy="50" r="1" opacity=".5"/><circle cx="340" cy="80" r=".8" opacity=".4"/><circle cx="120" cy="340" r="1.1" opacity=".5"/><circle cx="360" cy="300" r=".9" opacity=".4"/><circle cx="80" cy="200" r=".7" opacity=".35"/></g>
+</svg>
+<div class="dg2-badge"><div class="dg2-badge-title">Scout Ship — Hard Surface</div><div class="dg2-badge-sub">Blender · Substance Painter · PBR</div></div>
+</div>
+
+<!-- ════════ 6. MOONLIT FOREST ════════ -->
+<div class="dg2-item dg2-half">
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="fBg" cx="40%" cy="55%"><stop offset="0%" stop-color="#0e1210"/><stop offset="100%" stop-color="#060808"/></radialGradient></defs>
+  <rect width="400" height="400" fill="url(#fBg)"/>
+  <rect x="0" y="282" width="400" height="118" fill="#0c1009" opacity=".9"/>
+  <g opacity=".82">
+    <polygon points="28,282 58,128 90,282" fill="#0f1a0d"/>
+    <polygon points="58,282 90,98 126,282" fill="#111e0e"/>
+    <polygon points="118,282 162,82 208,282" fill="#0f1a0d"/>
+    <polygon points="198,282 244,118 290,282" fill="#111e0e"/>
+    <polygon points="264,282 294,146 328,282" fill="#0f1a0d"/>
+    <polygon points="302,282 338,116 376,282" fill="#111e0e"/>
+  </g>
+  <rect x="0" y="258" width="400" height="46" fill="#0a0a0a" opacity=".42"/>
+  <rect x="0" y="302" width="400" height="98" fill="#050c05" opacity=".82"/>
+  <ellipse cx="200" cy="338" rx="21" ry="58" fill="#e8ff47" opacity=".04"/>
+  <circle cx="200" cy="52" r="30" fill="#f0e8be" opacity=".76"/>
+  <circle cx="200" cy="52" r="28" fill="none" stroke="#fff" stroke-width=".5" opacity=".3"/>
+  <path d="M 0,190 Q 200,135 400,172" fill="none" stroke="#00ff88" stroke-width="1.5" opacity=".18"/>
+  <g fill="#fff" opacity=".45"><circle cx="38" cy="30" r="1"/><circle cx="160" cy="48" r=".8"/><circle cx="310" cy="24" r="1.1"/><circle cx="372" cy="42" r=".9"/></g>
+</svg>
+<div class="dg2-badge"><div class="dg2-badge-title">Moonlit Forest — Environment Art</div><div class="dg2-badge-sub">UE5 Nanite · Lumen GI · Volumetric Fog</div></div>
+</div>
+
+    </div><!-- end dg2 -->
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">04 — Skills</div>
+      <h2 class="section-title">What I<br><span class="dim">bring to the table</span></h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="skills-grid reveal">
+      <div class="skill-block">
+        <span class="skill-icon">🎮</span>
+        <div class="skill-name">Game Development</div>
+        <div class="skill-desc">Full-cycle game dev in Unity & Unreal Engine 5 — from prototyping to final build. C# scripting, Blueprints, physics, AI, and performance optimization.</div>
+      </div>
+      <div class="skill-block">
+        <span class="skill-icon">🧊</span>
+        <div class="skill-name">3D Modeling & Art</div>
+        <div class="skill-desc">Hard surface, organic, and environment modeling in Blender. UV unwrapping, retopology, LOD creation, and asset pipelines for real-time engines.</div>
+      </div>
+      <div class="skill-block">
+        <span class="skill-icon">✨</span>
+        <div class="skill-name">Shaders & VFX</div>
+        <div class="skill-desc">Custom shaders in HLSL and Unity ShaderGraph. Particle systems, post-processing stacks, screen-space effects, and Niagara VFX in Unreal.</div>
+      </div>
+      <div class="skill-block">
+        <span class="skill-icon">🎨</span>
+        <div class="skill-name">Texturing & Lighting</div>
+        <div class="skill-desc">PBR texturing with Substance Painter & Designer. Baking workflows, lightmapping, dynamic GI, and Lumen real-time global illumination.</div>
+      </div>
+      <div class="skill-block">
+        <span class="skill-icon">🗺️</span>
+        <div class="skill-name">Level & World Design</div>
+        <div class="skill-desc">Creating compelling game worlds with strong spatial narratives. Proficient in Unity terrain tools, UE5 Landscape, and modular kit design.</div>
+      </div>
+      <div class="skill-block">
+        <span class="skill-icon">🖥️</span>
+        <div class="skill-name">UI / UX for Games</div>
+        <div class="skill-desc">Designing intuitive and visually striking game interfaces. HUD systems, menus, and in-world UI — prototyped in Figma, implemented in engine.</div>
+      </div>
+      <div class="skill-block">
+        <span class="skill-icon">🔧</span>
+        <div class="skill-name">Pipeline & Tools</div>
+        <div class="skill-desc">Git version control, asset management, build pipelines, and cross-platform deployment for PC, mobile, and WebGL targets.</div>
+      </div>
+      <div class="skill-block">
+        <span class="skill-icon">🎵</span>
+        <div class="skill-name">Audio Integration</div>
+        <div class="skill-desc">Integrating adaptive audio with FMOD and Unity's audio system. Spatial audio design, procedural SFX, and music state machines for dynamic soundscapes.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GAMEPLAY DEMOS -->
+<section id="demos" style="border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">05 — Gameplay Demos</div>
+      <h2 class="section-title">Playable<br><span class="dim">right here</span></h2>
+      <div class="section-line"></div>
+      <p style="color:var(--muted2);font-size:15px;font-weight:300;margin-top:20px;max-width:540px;">Three fully playable mini-games built in vanilla JavaScript — demonstrating game logic, physics, AI, and real-time rendering I use in my Unity & Unreal projects.</p>
+    </div>
+
+    <!-- DEMO TABS -->
+    <div class="demo-tabs reveal">
+      <button class="demo-tab active" onclick="switchDemo('space')">
+        <span class="demo-tab-icon">🚀</span>
+        <span class="demo-tab-label">Void Shooter</span>
+      </button>
+      <button class="demo-tab" onclick="switchDemo('dungeon')">
+        <span class="demo-tab-icon">⚔️</span>
+        <span class="demo-tab-label">Dungeon Run</span>
+      </button>
+      <button class="demo-tab" onclick="switchDemo('racer')">
+        <span class="demo-tab-icon">🏎️</span>
+        <span class="demo-tab-label">Neon Racer</span>
+      </button>
+    </div>
+
+    <div class="demo-stage reveal">
+      <!-- Game canvases -->
+      <div id="demo-space" class="demo-panel active">
+        <canvas id="spaceCanvas" width="900" height="480"></canvas>
+        <div class="demo-controls">
+          <span>← → Move</span><span>Space / Click — Shoot</span><span>Survive the waves!</span>
+        </div>
+      </div>
+      <div id="demo-dungeon" class="demo-panel">
+        <canvas id="dungeonCanvas" width="900" height="480"></canvas>
+        <div class="demo-controls">
+          <span>WASD / Arrow keys — Move</span><span>Collect all gems 💎 to win</span><span>Avoid the red guards!</span>
+        </div>
+      </div>
+      <div id="demo-racer" class="demo-panel">
+        <canvas id="racerCanvas" width="900" height="480"></canvas>
+        <div class="demo-controls">
+          <span>← → Steer</span><span>Dodge traffic</span><span>Score as high as you can!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+/* DEMO STYLES */
+.demo-tabs {
+  display:flex; gap:2px; margin-bottom:2px;
+}
+.demo-tab {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:10px;
+  padding:16px 24px;
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--muted2); font-family:var(--font-display); font-size:14px; font-weight:600;
+  cursor:none; transition:all 0.2s;
+}
+.demo-tab:hover { color:var(--text); border-color:var(--muted); }
+.demo-tab.active { background:var(--surface2); border-color:var(--accent); color:var(--accent); }
+.demo-tab-icon { font-size:18px; }
+
+.demo-stage {
+  border:1px solid var(--border);
+  position:relative; overflow:hidden;
+  background:#050505;
+}
+.demo-panel { display:none; flex-direction:column; }
+.demo-panel.active { display:flex; }
+.demo-panel canvas {
+  width:100%; height:auto; display:block;
+  image-rendering:pixelated;
+}
+.demo-controls {
+  display:flex; gap:0; border-top:1px solid var(--border);
+}
+.demo-controls span {
+  flex:1; text-align:center; padding:10px;
+  font-size:12px; letter-spacing:0.06em;
+  color:var(--muted); border-right:1px solid var(--border);
+}
+.demo-controls span:last-child { border-right:none; }
+
+@media(max-width:700px){
+  .demo-tab-label { display:none; }
+  .demo-tab { padding:14px; }
+}
+</style>
+
+<script>
+/* ============================================================
+   DEMO MANAGER
+============================================================ */
+function switchDemo(id) {
+  document.querySelectorAll('.demo-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('demo-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(id==='space')   startSpace();
+  if(id==='dungeon') startDungeon();
+  if(id==='racer')   startRacer();
+}
+
+/* ============================================================
+   GAME 1: VOID SHOOTER  (space shooter)
+============================================================ */
+(function(){
+  const C = document.getElementById('spaceCanvas');
+  const ctx = C.getContext('2d');
+  const W = C.width, H = C.height;
+  let running=false, raf;
+  let player, bullets, enemies, particles, stars, score, lives, wave, spawnTimer, gameOver;
+
+  function init(){
+    player = {x:W/2,y:H-70,w:28,h:36,speed:5,shooting:0,immune:0};
+    bullets=[]; enemies=[]; particles=[]; score=0; lives=3; wave=1; spawnTimer=0; gameOver=false;
+    stars = Array.from({length:120},()=>({x:Math.random()*W,y:Math.random()*H,s:Math.random()*1.5+0.3,sp:Math.random()*1.5+0.3}));
+  }
+
+  function spawnEnemy(){
+    const t = Math.random()<0.15?'tank':Math.random()<0.2?'zigzag':'basic';
+    enemies.push({
+      x:40+Math.random()*(W-80), y:-30,
+      w:22,h:22,hp:t==='tank'?3:1,
+      speed:(0.8+wave*0.15)*(t==='tank'?0.6:1),
+      type:t, phase:Math.random()*Math.PI*2, shootCd:60+Math.random()*80,
+      color:t==='tank'?'#ff4444':t==='zigzag'?'#ff9900':'#cc44ff'
+    });
+  }
+
+  const keys={};
+  document.addEventListener('keydown',e=>{keys[e.key]=true; if(e.key===' '&&gameOver){init();running=true;}});
+  document.addEventListener('keyup',e=>{keys[e.key]=false;});
+  C.addEventListener('click',()=>{if(gameOver){init();running=true;}});
+
+  function addParticles(x,y,col,n=8){
+    for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-0.5)*5,vy:(Math.random()-0.5)*5,life:30,col});
+  }
+
+  function drawShip(x,y,w,h,col,dir=1){
+    ctx.save(); ctx.translate(x,y); if(dir<0)ctx.scale(1,-1);
+    ctx.fillStyle=col;
+    ctx.beginPath(); ctx.moveTo(0,-h/2); ctx.lineTo(w/2,h/2); ctx.lineTo(0,h/3); ctx.lineTo(-w/2,h/2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.15)';
+    ctx.beginPath(); ctx.moveTo(0,-h/2); ctx.lineTo(w/3,0); ctx.lineTo(0,0); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  function frame(){
+    if(!running)return;
+    raf = requestAnimationFrame(frame);
+    ctx.fillStyle='#05050f'; ctx.fillRect(0,0,W,H);
+
+    // stars
+    stars.forEach(s=>{ s.y+=s.sp; if(s.y>H)s.y=0; ctx.fillStyle=`rgba(255,255,255,${0.3+s.s*0.2})`; ctx.fillRect(s.x,s.y,s.s,s.s); });
+
+    if(gameOver){
+      ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#e8ff47'; ctx.font='bold 48px Syne,sans-serif'; ctx.textAlign='center'; ctx.fillText('GAME OVER',W/2,H/2-30);
+      ctx.fillStyle='#aaa'; ctx.font='18px DM Sans,sans-serif'; ctx.fillText('Score: '+score,W/2,H/2+20);
+      ctx.fillStyle='#666'; ctx.font='14px DM Sans,sans-serif'; ctx.fillText('Click or Space to restart',W/2,H/2+56);
+      return;
+    }
+
+    // player move
+    if((keys['ArrowLeft']||keys['a']||keys['A']) && player.x>player.w) player.x-=player.speed;
+    if((keys['ArrowRight']||keys['d']||keys['D']) && player.x<W-player.w) player.x+=player.speed;
+    if((keys['ArrowUp']||keys['w']||keys['W']) && player.y>H/2) player.y-=player.speed;
+    if((keys['ArrowDown']||keys['s']||keys['S']) && player.y<H-player.h) player.y+=player.speed;
+
+    // shoot
+    player.shooting--; if((keys[' ']||keys['ArrowUp'])&&player.shooting<=0){ bullets.push({x:player.x,y:player.y-player.h/2,vy:-10,owner:'p'}); player.shooting=10; }
+    if(player.immune>0) player.immune--;
+
+    // spawn enemies
+    spawnTimer--; const rate=Math.max(30,80-wave*8);
+    if(spawnTimer<=0){ spawnEnemy(); if(wave>2&&Math.random()<0.3)spawnEnemy(); spawnTimer=rate; }
+
+    // update enemies
+    enemies.forEach(e=>{
+      if(e.type==='zigzag') e.x+=Math.sin(e.phase)*2.2, e.phase+=0.05;
+      e.y+=e.speed;
+      e.shootCd--; if(e.shootCd<=0&&Math.random()<0.4){ bullets.push({x:e.x,y:e.y+e.h/2,vy:3.5+wave*0.2,owner:'e'}); e.shootCd=80+Math.random()*60; }
+    });
+
+    // update bullets
+    bullets.forEach(b=>b.y+=b.vy);
+    bullets=bullets.filter(b=>b.y>-10&&b.y<H+10);
+
+    // collisions player bullets vs enemies
+    bullets.filter(b=>b.owner==='p').forEach(b=>{
+      enemies.forEach(e=>{
+        if(Math.abs(b.x-e.x)<e.w&&Math.abs(b.y-e.y)<e.h){
+          b.dead=true; e.hp--; addParticles(e.x,e.y,e.color,4);
+          if(e.hp<=0){ e.dead=true; score+=e.type==='tank'?30:10; addParticles(e.x,e.y,e.color,14); }
+        }
+      });
+    });
+
+    // enemy bullets vs player
+    if(player.immune<=0) bullets.filter(b=>b.owner==='e').forEach(b=>{
+      if(Math.abs(b.x-player.x)<player.w&&Math.abs(b.y-player.y)<player.h){
+        b.dead=true; lives--; player.immune=90; addParticles(player.x,player.y,'#e8ff47',12);
+        if(lives<=0) gameOver=true;
+      }
+    });
+
+    // enemy vs player direct
+    enemies.forEach(e=>{
+      if(e.y>H) e.dead=true;
+      if(player.immune<=0&&Math.abs(e.x-player.x)<player.w+e.w&&Math.abs(e.y-player.y)<player.h+e.h){ lives--; e.dead=true; player.immune=90; addParticles(player.x,player.y,'#e8ff47',12); if(lives<=0)gameOver=true; }
+    });
+
+    bullets=bullets.filter(b=>!b.dead); enemies=enemies.filter(e=>!e.dead);
+
+    // wave up
+    if(score>= wave*150) wave++;
+
+    // particles
+    particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;p.vx*=0.92;p.vy*=0.92;});
+    particles=particles.filter(p=>p.life>0);
+
+    // draw bullets
+    bullets.forEach(b=>{
+      ctx.fillStyle=b.owner==='p'?'#e8ff47':'#ff4455';
+      ctx.shadowBlur=8; ctx.shadowColor=b.owner==='p'?'#e8ff47':'#ff4455';
+      ctx.fillRect(b.x-2,b.y-8,4,12); ctx.shadowBlur=0;
+    });
+
+    // draw enemies
+    enemies.forEach(e=>drawShip(e.x,e.y,e.w,e.h,e.color,-1));
+
+    // draw particles
+    particles.forEach(p=>{ ctx.globalAlpha=p.life/30; ctx.fillStyle=p.col; ctx.fillRect(p.x-2,p.y-2,4,4); });
+    ctx.globalAlpha=1;
+
+    // draw player (flicker if immune)
+    if(player.immune===0||Math.floor(player.immune/6)%2===0) drawShip(player.x,player.y,player.w,player.h,'#e8ff47');
+
+    // engine glow
+    ctx.fillStyle='rgba(232,255,71,0.35)'; ctx.beginPath(); ctx.ellipse(player.x,player.y+player.h/2+4,6,10,0,0,Math.PI*2); ctx.fill();
+
+    // HUD
+    ctx.fillStyle='#e8ff47'; ctx.font='bold 15px Syne,sans-serif'; ctx.textAlign='left'; ctx.fillText('SCORE  '+score,16,28);
+    ctx.textAlign='right'; ctx.fillText('WAVE  '+wave,W-16,28);
+    ctx.textAlign='center'; ctx.fillStyle='#555'; ctx.fillText('❤'.repeat(3),W/2,28);
+    ctx.fillStyle='#e8ff47'; ctx.fillText('❤'.repeat(Math.max(0,lives)),W/2,28);
+  }
+
+  // auto-start when section visible
+  let started=false;
+  const obs=new IntersectionObserver(en=>{ en.forEach(e=>{ if(e.isIntersecting&&!started){ started=true; init(); running=true; frame(); } }); },{threshold:0.3});
+  obs.observe(C);
+
+  // expose restart
+  window._spaceStart=function(){ if(raf)cancelAnimationFrame(raf); init(); running=true; frame(); };
+  window.startSpace=function(){ if(!started){ started=true; init(); running=true; frame(); } else { if(raf)cancelAnimationFrame(raf); init(); running=true; frame(); } };
+})();
+
+/* ============================================================
+   GAME 2: DUNGEON RUN
+============================================================ */
+(function(){
+  const C=document.getElementById('dungeonCanvas');
+  const ctx=C.getContext('2d');
+  const W=C.width,H=C.height;
+  const TILE=40, COLS=Math.floor(W/TILE), ROWS=Math.floor(H/TILE);
+  let map,player,guards,gems,totalGems,score,gameOver,win,raf,running=false,started=false;
+
+  function genMap(){
+    // 0=floor,1=wall
+    let m=Array.from({length:ROWS},()=>Array(COLS).fill(0));
+    // border walls
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(r===0||r===ROWS-1||c===0||c===COLS-1) m[r][c]=1;
+    // random inner walls
+    for(let i=0;i<60;i++){
+      let r=1+Math.floor(Math.random()*(ROWS-2)), c=1+Math.floor(Math.random()*(COLS-2));
+      if(!(r<=2&&c<=2)) m[r][c]=1;
+    }
+    return m;
+  }
+
+  function placeable(r,c){ return map[r]&&map[r][c]===0; }
+
+  function init(){
+    map=genMap(); gems=[]; score=0; gameOver=false; win=false;
+    player={r:2,c:2,x:2*TILE+TILE/2,y:2*TILE+TILE/2,moving:0,tr:2,tc:2,dir:{r:0,c:0},immune:0};
+
+    // place gems
+    let count=0;
+    while(count<12){
+      let r=1+Math.floor(Math.random()*(ROWS-2)), c=1+Math.floor(Math.random()*(COLS-2));
+      if(placeable(r,c)&&!(r<=3&&c<=3)&&!gems.find(g=>g.r===r&&g.c===c)){ gems.push({r,c,collected:false}); count++; }
+    }
+    totalGems=gems.length;
+
+    // place guards
+    guards=[];
+    for(let i=0;i<4;i++){
+      let r,c;
+      do{ r=1+Math.floor(Math.random()*(ROWS-2)); c=1+Math.floor(Math.random()*(COLS-2)); }
+      while(!placeable(r,c)||(r<=4&&c<=4));
+      guards.push({r,c,x:c*TILE+TILE/2,y:r*TILE+TILE/2,tr:r,tc:c,dir:Math.random()<0.5?{r:0,c:1}:{r:1,c:0},timer:0,speed:0.03+i*0.01,phase:0});
+    }
+  }
+
+  const keys={};
+  document.addEventListener('keydown',e=>{
+    keys[e.key]=true;
+    if((e.key==='ArrowUp'||e.key==='ArrowDown'||e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='w'||e.key==='a'||e.key==='s'||e.key==='d') && document.getElementById('demo-dungeon').classList.contains('active')) e.preventDefault();
+    if(gameOver||win){ init(); }
+  });
+  document.addEventListener('keyup',e=>keys[e.key]=false);
+  C.addEventListener('click',()=>{ if(gameOver||win){ init(); } });
+
+  function movePlayer(){
+    if(player.moving>0){ player.moving=Math.max(0,player.moving-0.18); player.x=lerp(player.c*TILE+TILE/2,player.tr*TILE+TILE/2,1-player.moving); player.y=lerp(player.r*TILE+TILE/2,player.tc*TILE+TILE/2,1-player.moving); return; }
+    // snap
+    player.r=player.tr; player.c=player.tc; player.x=player.c*TILE+TILE/2; player.y=player.r*TILE+TILE/2;
+    let dr=0,dc=0;
+    if(keys['ArrowUp']||keys['w']||keys['W'])dr=-1;
+    else if(keys['ArrowDown']||keys['s']||keys['S'])dr=1;
+    else if(keys['ArrowLeft']||keys['a']||keys['A'])dc=-1;
+    else if(keys['ArrowRight']||keys['d']||keys['D'])dc=1;
+    if(dr||dc){ let nr=player.r+dr,nc=player.c+dc; if(placeable(nr,nc)){ player.tr=nr;player.tc=nc;player.moving=1;player.dir={r:dr,c:dc}; } }
+  }
+
+  function lerp(a,b,t){ return a+(b-a)*t; }
+
+  function moveGuard(g){
+    g.phase+=g.speed; if(g.phase<1)return; g.phase=0;
+    if(Math.random()<0.25){ let dirs=[{r:0,c:1},{r:0,c:-1},{r:1,c:0},{r:-1,c:0}]; g.dir=dirs[Math.floor(Math.random()*dirs.length)]; }
+    let nr=g.r+g.dir.r, nc=g.c+g.dir.c;
+    if(!placeable(nr,nc)){ let dirs=[{r:0,c:1},{r:0,c:-1},{r:1,c:0},{r:-1,c:0}]; for(let d of dirs){ if(placeable(g.r+d.r,g.c+d.c)){ g.dir=d;nr=g.r+d.r;nc=g.c+d.c;break; } } }
+    if(placeable(nr,nc)){ g.r=nr;g.c=nc;g.x=nc*TILE+TILE/2;g.y=nr*TILE+TILE/2; }
+  }
+
+  function frame(){
+    if(!running)return;
+    raf=requestAnimationFrame(frame);
+    ctx.fillStyle='#0a080c'; ctx.fillRect(0,0,W,H);
+
+    // draw map
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      if(map[r][c]===1){
+        ctx.fillStyle='#181020';
+        ctx.fillRect(c*TILE,r*TILE,TILE,TILE);
+        ctx.strokeStyle='#241830'; ctx.lineWidth=1; ctx.strokeRect(c*TILE+0.5,r*TILE+0.5,TILE-1,TILE-1);
+        // brick highlight
+        ctx.fillStyle='rgba(255,255,255,0.03)'; ctx.fillRect(c*TILE,r*TILE,TILE,3);
+      } else {
+        ctx.fillStyle='#0d0a12'; ctx.fillRect(c*TILE,r*TILE,TILE,TILE);
+        ctx.strokeStyle='#13101a'; ctx.lineWidth=0.5; ctx.strokeRect(c*TILE,r*TILE,TILE,TILE);
+      }
+    }
+
+    // gems
+    gems.forEach(g=>{
+      if(g.collected)return;
+      let gx=g.c*TILE+TILE/2, gy=g.r*TILE+TILE/2;
+      let t=Date.now()/600;
+      ctx.save(); ctx.translate(gx,gy+Math.sin(t+g.c)*2);
+      ctx.shadowBlur=12; ctx.shadowColor='#00ffcc';
+      ctx.fillStyle='#00ffcc';
+      ctx.beginPath(); ctx.moveTo(0,-8); ctx.lineTo(6,0); ctx.lineTo(0,8); ctx.lineTo(-6,0); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.beginPath(); ctx.moveTo(0,-8); ctx.lineTo(6,0); ctx.lineTo(0,0); ctx.closePath(); ctx.fill();
+      ctx.shadowBlur=0; ctx.restore();
+    });
+
+    movePlayer();
+    guards.forEach(g=>moveGuard(g));
+
+    // collect gems
+    gems.forEach(g=>{ if(!g.collected&&g.r===player.tr&&g.c===player.tc){ g.collected=true; score+=10; } });
+    if(gems.every(g=>g.collected)) win=true;
+
+    // guard collision
+    if(player.immune<=0) guards.forEach(g=>{ if(Math.abs(g.x-player.x)<TILE*0.7&&Math.abs(g.y-player.y)<TILE*0.7){ gameOver=true; } });
+    if(player.immune>0) player.immune--;
+
+    // draw guards
+    guards.forEach(g=>{
+      let pulse=0.8+0.2*Math.sin(Date.now()/200);
+      ctx.shadowBlur=14*pulse; ctx.shadowColor='#ff3344';
+      ctx.fillStyle='#cc2233';
+      ctx.beginPath(); ctx.arc(g.x,g.y,13,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#ff5566';
+      ctx.beginPath(); ctx.arc(g.x-4,g.y-4,4,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(g.x+4,g.y-4,4,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+    });
+
+    // draw player
+    let px=player.x, py=player.y;
+    ctx.shadowBlur=16; ctx.shadowColor='#e8ff47';
+    ctx.fillStyle='#e8ff47';
+    ctx.beginPath(); ctx.arc(px,py,12,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,0.5)';
+    ctx.beginPath(); ctx.arc(px-3,py-3,4,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(px+3,py-3,4,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.6)'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(px,py+3,4,0,Math.PI); ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // HUD
+    let collected=gems.filter(g=>g.collected).length;
+    ctx.fillStyle='rgba(0,0,0,0.55)'; ctx.fillRect(0,0,W,38);
+    ctx.fillStyle='#e8ff47'; ctx.font='bold 14px Syne,sans-serif'; ctx.textAlign='left'; ctx.fillText('GEMS  '+collected+'/'+totalGems,16,24);
+    ctx.textAlign='right'; ctx.fillText('SCORE  '+score,W-16,24);
+
+    if(gameOver){
+      ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#ff4455'; ctx.font='bold 44px Syne,sans-serif'; ctx.textAlign='center'; ctx.fillText('CAUGHT!',W/2,H/2-20);
+      ctx.fillStyle='#aaa'; ctx.font='16px DM Sans,sans-serif'; ctx.fillText('Click or any key to retry',W/2,H/2+24);
+    }
+    if(win){
+      ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#e8ff47'; ctx.font='bold 44px Syne,sans-serif'; ctx.textAlign='center'; ctx.fillText('YOU WIN! 🏆',W/2,H/2-20);
+      ctx.fillStyle='#aaa'; ctx.font='16px DM Sans,sans-serif'; ctx.fillText('Score: '+score+'  — Click to play again',W/2,H/2+24);
+    }
+  }
+
+  window.startDungeon=function(){
+    if(raf)cancelAnimationFrame(raf);
+    init(); running=true; frame();
+  };
+
+  const obs=new IntersectionObserver(en=>{ en.forEach(e=>{ if(e.isIntersecting&&!started){ started=true; /* lazy start */ } }); },{threshold:0.3});
+  obs.observe(C);
+})();
+
+/* ============================================================
+   GAME 3: NEON RACER
+============================================================ */
+(function(){
+  const C=document.getElementById('racerCanvas');
+  const ctx=C.getContext('2d');
+  const W=C.width,H=C.height;
+  const ROAD_W=320, ROAD_X=(W-ROAD_W)/2;
+  const LANES=[ROAD_X+50,ROAD_X+130,ROAD_X+210,ROAD_X+290];
+  let player,traffic,roadLines,score,speed,gameOver,raf,running=false,started=false,spawnCd;
+
+  const COLORS=['#ff2244','#ff8800','#44aaff','#aa44ff','#ff44aa'];
+
+  function init(){
+    player={x:LANES[1],y:H-100,w:34,h:58,lane:1,targetX:LANES[1],lean:0};
+    traffic=[]; roadLines=[]; score=0; speed=4; gameOver=false; spawnCd=60;
+    for(let i=0;i<10;i++) roadLines.push({y:i*(H/5)-H/5});
+  }
+
+  const keys={};
+  document.addEventListener('keydown',e=>{ keys[e.key]=true; if(gameOver)init(); });
+  document.addEventListener('keyup',e=>keys[e.key]=false);
+  C.addEventListener('click',()=>{ if(gameOver)init(); });
+
+  function spawnCar(){
+    let lane=Math.floor(Math.random()*LANES.length);
+    // avoid stacking
+    let blocked=traffic.some(t=>t.lane===lane&&t.y<0&&t.y>-120);
+    if(blocked) lane=(lane+1)%LANES.length;
+    traffic.push({x:LANES[lane],y:-70,w:32,h:54,lane,color:COLORS[Math.floor(Math.random()*COLORS.length)],speed:speed*0.6+Math.random()*1.5});
+  }
+
+  function drawCar(x,y,w,h,col,isPlayer,lean=0){
+    ctx.save(); ctx.translate(x,y); ctx.rotate(lean*0.06);
+    // body
+    ctx.fillStyle=col;
+    ctx.beginPath(); ctx.roundRect(-w/2,-h/2,w,h,6); ctx.fill();
+    // windshield
+    ctx.fillStyle='rgba(180,220,255,0.25)';
+    ctx.beginPath(); ctx.roundRect(-w/2+5,isPlayer?-h/2+8:-h/2+6,w-10,h*0.28,4); ctx.fill();
+    // headlights / taillights
+    if(isPlayer){
+      ctx.fillStyle='rgba(255,255,180,0.9)'; ctx.beginPath(); ctx.ellipse(-w/2+5,-h/2+4,5,3,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(w/2-5,-h/2+4,5,3,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='rgba(255,50,50,0.9)'; ctx.beginPath(); ctx.ellipse(-w/2+5,h/2-4,4,3,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(w/2-5,h/2-4,4,3,0,0,Math.PI*2); ctx.fill();
+      // engine glow
+      ctx.shadowBlur=18; ctx.shadowColor='#e8ff47';
+      ctx.fillStyle='rgba(232,255,71,0.4)'; ctx.fillRect(-10,h/2-2,20,6); ctx.shadowBlur=0;
+    } else {
+      ctx.fillStyle='rgba(255,80,80,0.9)'; ctx.beginPath(); ctx.ellipse(-w/2+5,h/2-4,5,3,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(w/2-5,h/2-4,5,3,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='rgba(255,220,100,0.5)'; ctx.beginPath(); ctx.ellipse(-w/2+5,-h/2+5,4,2.5,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(w/2-5,-h/2+5,4,2.5,0,0,Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function frame(){
+    if(!running)return;
+    raf=requestAnimationFrame(frame);
+    // bg
+    ctx.fillStyle='#080810'; ctx.fillRect(0,0,W,H);
+    // cityscape
+    ctx.fillStyle='#0d0d18';
+    for(let i=0;i<14;i++){
+      let bw=30+i*12, bh=60+((i*37)%180), bx=i*70-20;
+      ctx.fillRect(bx,H-bh-20,bw,bh);
+      ctx.fillStyle='rgba(100,100,255,0.08)'; ctx.fillRect(bx,H-bh-20,bw,bh); ctx.fillStyle='#0d0d18';
+    }
+    // sidewalks
+    ctx.fillStyle='#111118'; ctx.fillRect(0,0,ROAD_X,H); ctx.fillRect(ROAD_X+ROAD_W,0,W-ROAD_X-ROAD_W,H);
+    // road
+    const rg=ctx.createLinearGradient(ROAD_X,0,ROAD_X+ROAD_W,0);
+    rg.addColorStop(0,'#141420'); rg.addColorStop(0.5,'#181828'); rg.addColorStop(1,'#141420');
+    ctx.fillStyle=rg; ctx.fillRect(ROAD_X,0,ROAD_W,H);
+    // road edges neon
+    ctx.strokeStyle='rgba(100,100,255,0.4)'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(ROAD_X+2,0); ctx.lineTo(ROAD_X+2,H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ROAD_X+ROAD_W-2,0); ctx.lineTo(ROAD_X+ROAD_W-2,H); ctx.stroke();
+    // lane dashes
+    ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=2; ctx.setLineDash([30,20]);
+    [ROAD_X+ROAD_W/4,ROAD_X+ROAD_W/2,ROAD_X+3*ROAD_W/4].forEach(lx=>{
+      ctx.beginPath(); ctx.moveTo(lx,0); ctx.lineTo(lx,H); ctx.stroke();
+    });
+    ctx.setLineDash([]);
+
+    // road lines (center moving)
+    roadLines.forEach(l=>{ l.y+=speed; if(l.y>H)l.y=-H/5; });
+
+    if(!gameOver){
+      // player input
+      if(keys['ArrowLeft']||keys['a']||keys['A']){ if(player.lane>0){ player.lane--; player.targetX=LANES[player.lane]; keys['ArrowLeft']=keys['a']=keys['A']=false; } }
+      if(keys['ArrowRight']||keys['d']||keys['D']){ if(player.lane<LANES.length-1){ player.lane++; player.targetX=LANES[player.lane]; keys['ArrowRight']=keys['d']=keys['D']=false; } }
+      player.x+=(player.targetX-player.x)*0.18;
+      player.lean=(player.targetX-player.x)*0.3;
+      score++; if(score%400===0) speed=Math.min(18,speed+0.5);
+
+      // traffic
+      spawnCd--; if(spawnCd<=0){ spawnCar(); spawnCd=Math.max(28,55-Math.floor(score/300)*4); }
+      traffic.forEach(t=>{ t.y+=speed-t.speed; });
+      traffic=traffic.filter(t=>t.y<H+80);
+
+      // collision
+      traffic.forEach(t=>{
+        if(Math.abs(t.x-player.x)<(t.w/2+player.w/2-6)&&Math.abs(t.y-player.y)<(t.h/2+player.h/2-10)) gameOver=true;
+      });
+    }
+
+    // draw traffic
+    traffic.forEach(t=>drawCar(t.x,t.y,t.w,t.h,t.color,false));
+    // draw player
+    if(!gameOver||Math.floor(Date.now()/80)%2===0) drawCar(player.x,player.y,player.w,player.h,'#e8ff47',true,player.lean);
+
+    // HUD
+    ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(0,0,W,40);
+    ctx.fillStyle='#e8ff47'; ctx.font='bold 14px Syne,sans-serif'; ctx.textAlign='left'; ctx.fillText('SCORE  '+score,16,26);
+    ctx.textAlign='right'; ctx.fillText('SPEED  '+speed.toFixed(1)+'x',W-16,26);
+    // speedometer bar
+    ctx.fillStyle='#222'; ctx.fillRect(W/2-60,12,120,14);
+    ctx.fillStyle='#e8ff47'; ctx.fillRect(W/2-60,12,(speed/18)*120,14);
+    ctx.fillStyle='rgba(0,0,0,0.4)'; ctx.font='10px DM Sans,sans-serif'; ctx.textAlign='center'; ctx.fillText('SPEED',W/2,23);
+
+    if(gameOver){
+      ctx.fillStyle='rgba(0,0,0,0.72)'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#ff2244'; ctx.font='bold 48px Syne,sans-serif'; ctx.textAlign='center'; ctx.fillText('CRASH!',W/2,H/2-28);
+      ctx.fillStyle='#e8ff47'; ctx.font='20px Syne,sans-serif'; ctx.fillText('Score: '+score,W/2,H/2+16);
+      ctx.fillStyle='#666'; ctx.font='14px DM Sans,sans-serif'; ctx.fillText('Click or any key to restart',W/2,H/2+50);
+    }
+  }
+
+  window.startRacer=function(){
+    if(raf)cancelAnimationFrame(raf);
+    init(); running=true; frame();
+  };
+  window.startSpace=window.startSpace||function(){};
+
+  const obs=new IntersectionObserver(en=>{ en.forEach(e=>{ if(e.isIntersecting&&!started){ started=true; } }); },{threshold:0.3});
+  obs.observe(C);
+})();
+</script>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-inner">
+      <div class="contact-left reveal">
+        <h2>Let's build<br>something<br><span class="accent">great.</span></h2>
+        <p>Open to freelance projects, collaborations, game jams, and full-time roles. Whether you have a vision or just an idea — let's talk.</p>
+      </div>
+      <div class="contact-links reveal">
+        <a href="mailto:clancy0786@gmail.com" class="contact-link">
+          <div class="contact-link-left">
+            <div class="contact-link-icon">✉️</div>
+            <div>
+              <div class="contact-link-text">Email</div>
+              <div class="contact-link-sub">clancy0786@gmail.com</div>
+            </div>
+          </div>
+          <div class="contact-link-arrow">→</div>
+        </a>
+        <a href="https://github.com/Clancy001" target="_blank" class="contact-link">
+          <div class="contact-link-left">
+            <div class="contact-link-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+            </div>
+            <div>
+              <div class="contact-link-text">GitHub</div>
+              <div class="contact-link-sub">github.com/Clancy001</div>
+            </div>
+          </div>
+          <div class="contact-link-arrow">→</div>
+        </a>
+        <a href="https://www.linkedin.com/in/harshsharmadev?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" class="contact-link">
+          <div class="contact-link-left">
+            <div class="contact-link-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </div>
+            <div>
+              <div class="contact-link-text">LinkedIn</div>
+              <div class="contact-link-sub">linkedin.com/in/harshsharmadev</div>
+            </div>
+          </div>
+          <div class="contact-link-arrow">→</div>
+        </a>
+        <a href="mailto:clancy0786@gmail.com" class="contact-link">
+          <div class="contact-link-left">
+            <div class="contact-link-icon">🎮</div>
+            <div>
+              <div class="contact-link-text">Open to Work</div>
+              <div class="contact-link-sub">Freelance · Full-time · Game Jams</div>
+            </div>
+          </div>
+          <div class="contact-link-arrow">→</div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-copy">© 2025 Harsh Sharma. All rights reserved.</div>
+      <div class="footer-badge">Designed &amp; built with <span>♥</span></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function animateCursor() {
+    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => { cursor.style.width = '16px'; cursor.style.height = '16px'; ring.style.width = '56px'; ring.style.height = '56px'; });
+    el.addEventListener('mouseleave', () => { cursor.style.width = '10px'; cursor.style.height = '10px'; ring.style.width = '36px'; ring.style.height = '36px'; });
+  });
+
+  // Navbar scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => { navbar.classList.toggle('scrolled', window.scrollY > 40); });
+
+  // Reveal on scroll
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Skill bars
+  const barObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.tool-fill').forEach(bar => {
+          bar.style.width = bar.dataset.width + '%';
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.about-tools').forEach(el => barObserver.observe(el));
+
+  // Smooth active nav link
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 200) current = s.id; });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--accent)' : '';
+    });
+  });
+</script>
+</body>
+</html>
